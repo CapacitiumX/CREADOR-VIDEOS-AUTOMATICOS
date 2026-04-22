@@ -2,72 +2,147 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapacitiumX - Generador Web Gratis</title>
+    <title>CAPACITIUMX V329 - WEB NARRATOR</title>
     <style>
-        :root { --primary: #00ff00; --bg: #050505; --text: #ffffff; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 50px; }
-        .hero { background: #111; padding: 40px 20px; text-align: center; border-bottom: 2px solid var(--primary); }
-        .hero h1 { color: var(--primary); margin: 0; font-size: 1.8rem; text-transform: uppercase; }
-        .search-container { max-width: 500px; margin: -30px auto 20px; padding: 0 20px; }
-        .search-box { background: #222; padding: 10px; border-radius: 10px; display: flex; border: 1px solid #444; }
-        .search-box input { flex: 1; border: none; background: transparent; color: white; padding: 10px; font-size: 16px; outline: none; }
-        .btn-search { background: var(--primary); color: black; border: none; padding: 10px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .results { max-width: 600px; margin: auto; padding: 20px; }
-        .domain-card { background: #111; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
-        .domain-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); margin-bottom: 10px; }
-        .instructions { background: #1a1a1a; padding: 15px; border-left: 4px solid var(--primary); font-size: 0.9rem; color: #ccc; }
-        .badge { background: #065f46; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; }
+        :root { --neon: #00ff00; --dark: #050505; --red: #ff0000; }
+        body { background: var(--dark); color: white; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        header { background: #111; padding: 15px; border-bottom: 2px solid var(--neon); display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+        .controls { display: flex; gap: 10px; align-items: center; }
+        
+        input, button { padding: 10px; background: #222; border: 1px solid var(--neon); color: var(--neon); font-weight: bold; cursor: pointer; }
+        button:hover { background: var(--neon); color: black; }
+        
+        #btnGrabar.recording { background: var(--red); color: white; border-color: white; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        main { display: flex; flex: 1; overflow: hidden; }
+        #timeline { flex: 2; border-right: 1px solid #333; padding: 20px; overflow-y: auto; }
+        #preview { flex: 1; background: #000; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+
+        .monitor { width: 100%; aspect-ratio: 16/9; border: 2px solid #222; background: #111; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .monitor img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .voice-card { background: #111; border: 1px solid #333; padding: 15px; width: 90%; margin-top: 20px; text-align: center; }
+        audio { width: 100%; margin-top: 10px; filter: invert(100%); }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .gallery img { width: 100%; border: 1px solid #333; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="hero">
-        <h1>CapacitiumX Free Web Gen</h1>
-        <p style="opacity: 0.8;">Crea tu presencia en internet 100% GRATIS</p>
+<header>
+    <div class="controls">
+        <span style="color:var(--neon);">[CAPACITIUMX V329]</span>
+        <input type="text" id="topic" placeholder="TEMA DEL VIDEO...">
+        <button onclick="searchImages()">TRAER FOTOS ✨</button>
     </div>
+    
+    <div class="controls">
+        <button id="btnGrabar" onclick="toggleRegistroVoz()">🎙️ GRABAR NARRACIÓN</button>
+        <button style="background: #2563eb; color: white;" onclick="downloadAll()">📥 DESCARGAR KIT</button>
+    </div>
+</header>
 
-    <div class="search-container">
-        <div class="search-box">
-            <input type="text" id="domainInput" placeholder="Nombre de tu proyecto..." onkeypress="if(event.key==='Enter') generateFreeWeb()">
-            <button class="btn-search" onclick="generateFreeWeb()">GENERAR</button>
+<main>
+    <section id="timeline">
+        <h3 style="color: var(--neon);">🎞️ LÍNEA DE TIEMPO / RECURSOS:</h3>
+        <div id="gallery" class="gallery"></div>
+    </section>
+
+    <section id="preview">
+        <div class="monitor" id="mainMonitor">
+            <span style="color: #333;">SIN SEÑAL</span>
         </div>
-    </div>
-
-    <div class="results" id="resultsArea">
-        <div style="text-align: center; color: #64748b; margin-top: 40px;">
-            <p>Escribe el nombre de tu marca para crear tu web gratuita</p>
+        
+        <div class="voice-card">
+            <strong style="color: var(--neon);">NARRACIÓN ACTUAL:</strong>
+            <div id="audioPlaybackContainer">
+                <p style="font-size: 10px; color: #666;">No hay grabación activa</p>
+            </div>
         </div>
-    </div>
 
-    <script>
-        function generateFreeWeb() {
-            const input = document.getElementById('domainInput').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const resultsArea = document.getElementById('resultsArea');
-            
-            if(!input) return alert("Escribe un nombre");
+        <textarea id="storyText" style="width: 90%; flex-grow: 1; margin-top: 20px; background: #111; color: #aaa; border: 1px solid #333; padding: 10px;" placeholder="Escribe o pega aquí tu guion para leerlo mientras grabas..."></textarea>
+    </section>
+</main>
 
-            resultsArea.innerHTML = `
-                <div class="domain-card">
-                    <div class="domain-name">${input}.github.io <span class="badge">100% GRATIS</span></div>
-                    <p>Esta será tu dirección profesional permanente sin pagar renovaciones.</p>
-                    
-                    <div class="instructions">
-                        <strong>PASOS PARA ACTIVARLA YA:</strong><br>
-                        1. Crea un repositorio en tu GitHub llamado: <b>${input}.github.io</b><br>
-                        2. Sube tu archivo <b>index.html</b> ahí.<br>
-                        3. ¡Listo! Tu página se verá en todo el mundo bajo ese nombre.
-                    </div>
-                    <br>
-                    <button class="btn-search" style="width:100%" onclick="window.open('https://github.com/new')">CREAR REPOSITORIO AHORA</button>
-                </div>
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
 
-                <div class="domain-card" style="opacity: 0.7">
-                    <div class="domain-name">${input}.netlify.app <span class="badge">GRATIS</span></div>
-                    <p>Opción alternativa de hosting gratuito de alta velocidad.</p>
-                </div>
-            `;
+    // --- MOTOR DE IMÁGENES ---
+    async function searchImages() {
+        const topic = document.getElementById('topic').value;
+        if(!topic) return alert("Ingresa un tema");
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = "<p>Buscando...</p>";
+
+        // Usamos una API de imágenes aleatorias para la demo (Unsplash)
+        const keywords = topic.split(' ');
+        gallery.innerHTML = "";
+        for(let i=0; i<12; i++) {
+            const img = document.createElement('img');
+            img.src = `https://picsum.photos/400/225?random=${i}&sig=${topic}`;
+            img.onclick = () => {
+                document.getElementById('mainMonitor').innerHTML = `<img src="${img.src}">`;
+            };
+            gallery.appendChild(img);
         }
-    </script>
+    }
+
+    // --- MOTOR DE VOZ ÉLITE ---
+    async function toggleRegistroVoz() {
+        const btn = document.getElementById('btnGrabar');
+        
+        if (!isRecording) {
+            // INICIAR GRABACIÓN
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = audioUrl;
+                    
+                    const container = document.getElementById('audioPlaybackContainer');
+                    container.innerHTML = "";
+                    container.appendChild(audio);
+
+                    // Botón para descargar el audio solo
+                    const dl = document.createElement('a');
+                    dl.href = audioUrl;
+                    dl.download = "narracion_capacitiumx.wav";
+                    dl.innerHTML = "<br><small style='color:cyan'>💾 GUARDAR VOZ (.WAV)</small>";
+                    container.appendChild(dl);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                btn.innerText = "⏹ DETENER Y GUARDAR";
+                btn.classList.add('recording');
+            } catch (err) {
+                alert("Error: No se pudo acceder al micrófono. Verifica los permisos de tu navegador.");
+            }
+        } else {
+            // DETENER GRABACIÓN
+            mediaRecorder.stop();
+            isRecording = false;
+            btn.innerText = "🎙️ GRABAR NARRACIÓN";
+            btn.classList.remove('recording');
+        }
+    }
+
+    function downloadAll() {
+        alert("Instrucción Élite: La voz grabada aparecerá abajo del monitor. Dale clic en 'GUARDAR VOZ' para descargarla y úsala en tu script de Python para el video final.");
+    }
+</script>
+
 </body>
 </html>
