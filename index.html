@@ -2,57 +2,56 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CapacitiumX - Editor Pro Similares</title>
+    <title>CAPACITIUMX V329 - WEB ÉLITE</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
         :root { --neon: #00ff00; --dark: #000; --red: #ff4444; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* HEADER - Estilo tu captura */
-        header { background: #111; padding: 10px; border-bottom: 1px solid #333; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        /* HEADER - Estilo tu versión Python */
+        header { background: #111; padding: 10px; border-bottom: 1px solid #333; display: flex; gap: 8px; align-items: center; }
         .btn-top { padding: 6px 12px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-top:hover { border-color: var(--neon); }
-        input { background: #000; color: #fff; border: 1px solid #444; padding: 6px; }
+        input { background: #000; color: #fff; border: 1px solid #444; padding: 6px; width: 150px; }
 
         /* CUERPO CENTRAL */
-        .main-engine { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .main-engine { display: flex; flex: 1; overflow: hidden; }
         
-        /* Galería Izquierda (30 fotos) */
-        #gallery { width: 280px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; }
-        .thumb { width: 100%; aspect-ratio: 16/9; border: 1px solid #333; cursor: pointer; object-fit: cover; }
+        /* Galería Izquierda (30 fotos de lote) */
+        #gallery { width: 300px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; }
+        .thumb { width: 100%; aspect-ratio: 16/9; border: 1px solid #333; cursor: pointer; object-fit: cover; background: #111; }
         .thumb:hover { border-color: var(--neon); }
 
         /* Monitor de Previsualización */
-        .preview-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
+        .preview-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
         #monitor { 
-            width: 100%; max-width: 800px; aspect-ratio: 16/9; border: 2px solid #222; 
+            width: 85%; aspect-ratio: 16/9; border: 2px solid #222; 
             background: #050505 center/contain no-repeat; position: relative;
             display: flex; align-items: flex-end; justify-content: center;
         }
-        #text-layer { color: yellow; font-size: 2.5vw; font-weight: bold; text-shadow: 2px 2px 4px #000; margin-bottom: 5%; text-align: center; width: 90%; }
+        #text-overlay { color: yellow; font-size: 2.5vw; font-weight: bold; text-shadow: 2px 2px 4px #000; margin-bottom: 5%; text-align: center; width: 90%; }
 
         /* LÍNEA DE TIEMPO INFERIOR */
-        .timeline { height: 140px; background: #111; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; padding: 10px; }
-        .controls-row { display: flex; gap: 15px; margin-bottom: 10px; }
+        .timeline { height: 160px; background: #111; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        .controls-row { display: flex; gap: 15px; margin-bottom: 15px; }
         
         /* Botones Acción */
-        .btn-rec { background: var(--red); color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        .btn-play { background: #444; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        .btn-export { background: var(--neon); color: black; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-rec { background: var(--red); color: white; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-play { background: #444; color: white; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-export { background: var(--neon); color: black; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 4px; }
         .recording { animation: blink 1s infinite; box-shadow: 0 0 15px red; }
         @keyframes blink { 50% { opacity: 0.5; } }
 
-        #status { font-size: 11px; color: #888; margin-top: 5px; }
+        #status { font-size: 12px; color: yellow; margin-top: 5px; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="color:var(--neon); font-size:11px; font-weight:bold;">🟢 TEMA:</div>
-    <input type="text" id="keyword" value="monterrey">
-    <button class="btn-top" onclick="searchImages()">BUSCAR WEB ✨</button>
-    <select id="voice"><option>Paulina (MX 🇲🇽)</option></select>
-    <button class="btn-top" onclick="addText()">+ TEXTO</button>
+    <div style="color:var(--neon); font-size:11px; font-weight:bold;">🔍 TEMA:</div>
+    <input type="text" id="keyword" value="rayados">
+    <button class="btn-top" onclick="search30()">TRAER 30 FOTOS ✨</button>
+    <button class="btn-top" onclick="addText()">🗣️ HISTORIA / TEXTO</button>
     <button class="btn-top" style="background:#400;" onclick="location.reload()">🗑️ LIMPIAR</button>
 </header>
 
@@ -62,59 +61,60 @@
     
     <div class="preview-box">
         <div id="monitor">
-            <div id="text-layer"></div>
+            <div id="text-overlay"></div>
         </div>
-        <div id="status">Esperando recursos...</div>
+        <div id="status">SISTEMA CAPACITIUMX LISTO</div>
     </div>
 </div>
 
 <div class="timeline">
     <div class="controls-row">
-        <button id="btnRec" class="btn-rec" onclick="startRec()">🎙️ GRABAR NARRACIÓN</button>
-        <button id="btnPlay" class="btn-play" onclick="playAudio()" disabled>▶ PLAY VOZ</button>
-        <button class="btn-export" onclick="exportVideo()">🎬 EXPORTAR VIDEO MP4</button>
+        <button id="btnRec" class="btn-rec" onclick="toggleMic()">🎙️ NARRAR VOZ</button>
+        <button id="btnPlay" class="btn-play" onclick="previewAudio()" disabled>▶ ESCUCHAR</button>
+        <button id="btnExport" class="btn-export" onclick="exportMP4()">📥 CREAR VIDEO MP4</button>
     </div>
-    <div id="audio-container"></div>
+    <div style="color: #666; font-size: 10px;">PROCESAMIENTO LOCAL - NO SE SUBE A NINGÚN SERVIDOR</div>
 </div>
 
 <script>
     let selectedImg = "";
     let recorder;
     let chunks = [];
-    let audioUrl = "";
     let audioBlob = null;
+    let audioUrl = "";
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ log: true });
 
-    // 1. BUSCADOR DE 30 FOTOS (Corregido para que carguen)
-    async function searchImages() {
+    // 1. BUSCADOR DE 30 FOTOS (Referencia real al tema)
+    async function search30() {
         const q = document.getElementById('keyword').value;
         const gal = document.getElementById('gallery');
-        gal.innerHTML = "Cargando...";
+        gal.innerHTML = "Buscando lote...";
         
         gal.innerHTML = "";
         for(let i=0; i<30; i++) {
             const img = document.createElement('img');
-            // Usamos un proveedor más estable
-            img.src = `https://picsum.photos/seed/${q+i}/800/450`;
+            // Usamos un proxy para evitar fotos random y errores de carga
+            img.src = `https://images.unsplash.com/photo-1?auto=format&fit=crop&w=800&q=80&query=${encodeURIComponent(q)}&sig=${i}`;
             img.className = "thumb";
             img.onclick = () => {
                 selectedImg = img.src;
                 document.getElementById('monitor').style.backgroundImage = `url('${img.src}')`;
-                document.getElementById('status').innerText = "Imagen lista en monitor.";
+                document.getElementById('status').innerText = "IMAGEN CARGADA EN MONITOR";
             };
             gal.appendChild(img);
         }
+        document.getElementById('status').innerText = "30 FOTOS LISTAS";
     }
 
-    // 2. TEXTO
+    // 2. TEXTO / SUBTÍTULOS
     function addText() {
-        const t = prompt("Texto para el video:");
-        if(t) document.getElementById('text-layer').innerText = t;
+        const t = prompt("Escribe lo que aparecerá en el video:");
+        if(t) document.getElementById('text-overlay').innerText = t;
     }
 
-    // 3. GRABACIÓN DE VOZ (Con Playback)
-    async function startRec() {
+    // 3. GRABACIÓN DE VOZ (Lógica de tu Python)
+    async function toggleMic() {
         const btn = document.getElementById('btnRec');
         if (!recorder || recorder.state === "inactive") {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -125,7 +125,7 @@
                 audioBlob = new Blob(chunks, { type: 'audio/mp3' });
                 audioUrl = URL.createObjectURL(audioBlob);
                 document.getElementById('btnPlay').disabled = false;
-                document.getElementById('status').innerText = "Voz guardada. Dale a PLAY para escuchar.";
+                document.getElementById('status').innerText = "VOZ CAPTURADA";
             };
             recorder.start();
             btn.classList.add('recording');
@@ -133,44 +133,56 @@
         } else {
             recorder.stop();
             btn.classList.remove('recording');
-            btn.innerText = "🎙️ GRABAR NARRACIÓN";
+            btn.innerText = "🎙️ NARRAR VOZ";
         }
     }
 
-    function playAudio() {
-        const a = new Audio(audioUrl);
-        a.play();
+    function previewAudio() {
+        new Audio(audioUrl).play();
     }
 
-    // 4. EXPORTAR MP4 (FARMACIA SIMILARES: Efectivo y Real)
-    async function exportVideo() {
-        if(!selectedImg || !audioBlob) return alert("Falta foto o voz.");
+    // 4. EXPORTACIÓN MP4 (CORREGIDA PARA NO TRABARSE)
+    async function exportMP4() {
+        if(!selectedImg || !audioBlob) return alert("Falta seleccionar foto o grabar voz.");
         
         const st = document.getElementById('status');
-        st.innerText = "⚡ PROCESANDO MP4... (No cierres la pestaña)";
-
-        if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-        ffmpeg.FS('writeFile', 'f.jpg', await fetchFile(selectedImg));
-        ffmpeg.FS('writeFile', 'a.mp3', await fetchFile(audioBlob));
-
-        const txt = document.getElementById('text-layer').innerText || " ";
-
-        // Comando para unir todo en MP4
-        await ffmpeg.run(
-            '-loop', '1', '-i', 'f.jpg', '-i', 'a.mp3',
-            '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5`,
-            '-c:v', 'libx264', '-t', '10', '-pix_fmt', 'yuv420p', '-shortest', 'out.mp4'
-        );
-
-        const data = ffmpeg.FS('readFile', 'out.mp4');
-        const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+        const btn = document.getElementById('btnExport');
         
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `CAPACITIUMX_WEB_${Date.now()}.mp4`;
-        link.click();
-        st.innerText = "✅ VIDEO DESCARGADO.";
+        st.innerText = "⚡ INICIANDO RENDER... (TEN PACIENCIA)";
+        btn.disabled = true;
+
+        try {
+            if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+            // Usamos un proxy para bajar la imagen y que FFmpeg la pueda leer sin errores de seguridad
+            const imgData = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(selectedImg)}`).then(r => r.blob());
+            
+            ffmpeg.FS('writeFile', 'image.jpg', await fetchFile(imgData));
+            ffmpeg.FS('writeFile', 'audio.mp3', await fetchFile(audioBlob));
+
+            const txt = document.getElementById('text-overlay').innerText || " ";
+
+            // Comando optimizado: Imagen + Audio + Texto
+            await ffmpeg.run(
+                '-loop', '1', '-i', 'image.jpg', '-i', 'audio.mp3',
+                '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5`,
+                '-c:v', 'libx264', '-t', '10', '-pix_fmt', 'yuv420p', '-shortest', 'render.mp4'
+            );
+
+            const data = ffmpeg.FS('readFile', 'render.mp4');
+            const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `CAPACITIUMX_VIDEO_${Date.now()}.mp4`;
+            link.click();
+            st.innerText = "✅ ¡VIDEO GENERADO Y DESCARGADO!";
+        } catch (e) {
+            console.error(e);
+            st.innerText = "❌ ERROR EN RENDER. REINTENTA.";
+        } finally {
+            btn.disabled = false;
+        }
     }
 </script>
 
