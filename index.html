@@ -2,77 +2,62 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX V329 - WEB FINAL</title>
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <title>CAPACITIUMX V329 - MOTOR FINAL</title>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <style>
-        :root { --neon: #00ff00; --dark: #0a0a0a; --red: #ff4d4d; }
+        :root { --neon: #00ff00; --dark: #000; --red: #ff4d4d; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* HEADER */
         header { background: #111; padding: 10px; border-bottom: 1px solid #333; display: flex; gap: 10px; align-items: center; }
-        .btn-top { padding: 8px 15px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-size: 12px; font-weight: bold; border-radius: 4px; }
-        .btn-top:hover { border-color: var(--neon); background: #333; }
-        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 200px; border-radius: 4px; }
+        .btn-top { padding: 8px 15px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 180px; }
 
-        /* CUERPO */
         .main-engine { display: flex; flex: 1; overflow: hidden; }
-        
-        /* Galería Izquierda */
-        #gallery { width: 320px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
-        .thumb { width: 100%; aspect-ratio: 16/9; border: 1px solid #333; cursor: pointer; object-fit: cover; background: #151515; border-radius: 2px; }
+        #gallery { width: 300px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
+        .thumb { width: 100%; aspect-ratio: 16/9; border: 1px solid #333; cursor: pointer; object-fit: cover; background: #151515; }
         .thumb:hover { border-color: var(--neon); }
 
-        /* Monitor */
         .preview-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
         #monitor { 
-            width: 100%; max-width: 850px; aspect-ratio: 16/9; border: 2px solid #222; 
+            width: 100%; max-width: 800px; aspect-ratio: 16/9; border: 2px solid #222; 
             background: #050505 center/contain no-repeat; position: relative;
             display: flex; align-items: flex-end; justify-content: center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
-        #text-overlay { color: #ffff00; font-size: 3vw; font-weight: bold; text-shadow: 2px 2px 8px #000; margin-bottom: 8%; text-align: center; width: 90%; font-family: 'Impact', sans-serif; }
+        #text-overlay { color: yellow; font-size: 3vw; font-weight: bold; text-shadow: 2px 2px 5px #000; margin-bottom: 8%; text-align: center; }
 
-        /* Timeline / Controles */
-        .timeline { height: 160px; background: #111; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-        .btn-rec { background: var(--red); color: white; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 14px; }
-        .btn-play { background: #444; color: white; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 14px; }
-        .btn-export { background: var(--neon); color: black; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 14px; }
-        .recording { animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.4; } }
-        #status { font-size: 12px; color: #aaa; margin-top: 5px; font-family: monospace; }
+        .timeline { height: 140px; background: #111; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .btn-action { padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; }
+        #status { font-size: 12px; color: #aaa; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="color:var(--neon); font-size:11px; font-weight:bold;">🟢 TEMA:</div>
-    <input type="text" id="keyword" value="rayados">
+    <div style="color:var(--neon); font-size:11px;">🟢 TEMA:</div>
+    <input type="text" id="keyword" value="rayados monterrey">
     <button class="btn-top" onclick="search30()">TRAER 30 FOTOS ✨</button>
-    <button class="btn-top" onclick="addText()">🗣️ HISTORIA / TEXTO</button>
+    <button class="btn-top" onclick="addText()">🗣️ TEXTO</button>
     <button class="btn-top" style="background:#400;" onclick="location.reload()">🗑️ LIMPIAR</button>
 </header>
 
 <div class="main-engine">
     <div id="gallery"></div>
     <div class="preview-box">
-        <div id="monitor">
-            <div id="text-overlay"></div>
-        </div>
-        <div id="status">ESTADO: LISTO PARA TRABAJAR</div>
+        <div id="monitor"><div id="text-overlay"></div></div>
+        <div id="status">SISTEMA CAPACITIUMX V329 ONLINE</div>
     </div>
 </div>
 
 <div class="timeline">
     <div style="display: flex; gap: 15px;">
-        <button id="btnRec" class="btn-rec" onclick="toggleMic()">🎙️ NARRAR VOZ</button>
-        <button id="btnPlay" class="btn-play" onclick="previewAudio()" disabled>▶ ESCUCHAR</button>
-        <button id="btnExport" class="btn-export" onclick="exportMP4()">🎬 CREAR VIDEO MP4</button>
+        <button id="btnRec" class="btn-action" style="background:var(--red); color:white;" onclick="toggleMic()">🎙️ NARRAR VOZ</button>
+        <button id="btnPlay" class="btn-action" style="background:#444; color:white;" onclick="previewAudio()" disabled>▶ ESCUCHAR</button>
+        <button id="btnExport" class="btn-action" style="background:var(--neon); color:black;" onclick="exportMP4()">🎬 CREAR VIDEO MP4</button>
     </div>
-    <div style="color: #444; font-size: 10px; letter-spacing: 1px;">PROCESAMIENTO LOCAL CAPACITIUMX V329</div>
 </div>
 
 <script>
-    let selectedImgData = null;
+    let selectedImgBlob = null;
     let recorder;
     let chunks = [];
     let audioBlob = null;
@@ -80,45 +65,39 @@
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ log: true });
 
-    // 1. BUSCADOR DE 30 FOTOS (Corregido para que NO se rompan)
     async function search30() {
         const q = document.getElementById('keyword').value;
         const gal = document.getElementById('gallery');
         gal.innerHTML = "";
-        document.getElementById('status').innerText = "BUSCANDO 30 FOTOS...";
+        document.getElementById('status').innerText = "BUSCANDO FOTOS REALES...";
         
         for(let i=0; i<30; i++) {
             const img = document.createElement('img');
-            // Usamos un proveedor directo que funciona mejor con GitHub
-            const url = `https://picsum.photos/seed/${q+i}/800/450`;
+            // Usamos Unsplash con parámetros de búsqueda para que las fotos SI concuerden
+            const url = `https://source.unsplash.com/800x450/?${encodeURIComponent(q)}&sig=${i}`;
             img.src = url;
             img.className = "thumb";
             img.onclick = async () => {
-                document.getElementById('status').innerText = "CARGANDO IMAGEN...";
-                // Convertimos la imagen a Base64 para que FFmpeg no falle por seguridad
-                const response = await fetch(url);
-                const blob = await response.blob();
-                selectedImgData = blob;
-                
+                document.getElementById('status').innerText = "PROCESANDO IMAGEN...";
+                const resp = await fetch(url);
+                selectedImgBlob = await resp.blob();
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     document.getElementById('monitor').style.backgroundImage = `url('${reader.result}')`;
                     document.getElementById('status').innerText = "IMAGEN LISTA";
                 };
-                reader.readAsDataURL(blob);
+                reader.readAsDataURL(selectedImgBlob);
             };
             gal.appendChild(img);
         }
-        document.getElementById('status').innerText = "30 FOTOS CARGADAS CON ÉXITO";
+        document.getElementById('status').innerText = "30 FOTOS CARGADAS";
     }
 
-    // 2. TEXTO
     function addText() {
-        const t = prompt("Escribe lo que aparecerá en el video:");
+        const t = prompt("Texto para el video:");
         if(t) document.getElementById('text-overlay').innerText = t;
     }
 
-    // 3. GRABACIÓN DE VOZ
     async function toggleMic() {
         const btn = document.getElementById('btnRec');
         if (!recorder || recorder.state === "inactive") {
@@ -130,54 +109,47 @@
                 audioBlob = new Blob(chunks, { type: 'audio/mp3' });
                 audioUrl = URL.createObjectURL(audioBlob);
                 document.getElementById('btnPlay').disabled = false;
-                document.getElementById('status').innerText = "VOZ GUARDADA. PUEDES ESCUCHARLA.";
+                document.getElementById('status').innerText = "VOZ LISTA";
             };
             recorder.start();
-            btn.classList.add('recording');
             btn.innerText = "⏹ DETENER";
+            btn.style.boxShadow = "0 0 15px red";
         } else {
             recorder.stop();
-            btn.classList.remove('recording');
             btn.innerText = "🎙️ NARRAR VOZ";
+            btn.style.boxShadow = "none";
         }
     }
 
-    function previewAudio() {
-        if(audioUrl) new Audio(audioUrl).play();
-    }
+    function previewAudio() { new Audio(audioUrl).play(); }
 
-    // 4. EXPORTACIÓN REAL (Corregida)
     async function exportMP4() {
-        if(!selectedImgData || !audioBlob) return alert("Falta seleccionar foto o grabar voz.");
-        
+        if(!selectedImgBlob || !audioBlob) return alert("Falta foto o voz.");
         const st = document.getElementById('status');
-        st.innerText = "⚡ PROCESANDO VIDEO... ESPERA UN MOMENTO";
+        st.innerText = "⚡ RENDERIZANDO MP4... ESPERA";
         
         try {
             if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-            ffmpeg.FS('writeFile', 'input.jpg', await fetchFile(selectedImgData));
-            ffmpeg.FS('writeFile', 'input.mp3', await fetchFile(audioBlob));
-
+            ffmpeg.FS('writeFile', 'i.jpg', await fetchFile(selectedImgBlob));
+            ffmpeg.FS('writeFile', 'a.mp3', await fetchFile(audioBlob));
             const txt = document.getElementById('text-overlay').innerText || " ";
 
-            // Comando optimizado para video de 10 segundos
+            // Comando optimizado para evitar errores de memoria
             await ffmpeg.run(
-                '-loop', '1', '-i', 'input.jpg', '-i', 'input.mp3',
+                '-loop', '1', '-i', 'i.jpg', '-i', 'a.mp3',
                 '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5`,
-                '-c:v', 'libx264', '-t', '10', '-pix_fmt', 'yuv420p', '-shortest', 'output.mp4'
+                '-c:v', 'libx264', '-t', '5', '-pix_fmt', 'yuv420p', '-shortest', 'out.mp4'
             );
 
-            const data = ffmpeg.FS('readFile', 'output.mp4');
+            const data = ffmpeg.FS('readFile', 'out.mp4');
             const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-            
             const a = document.createElement('a');
             a.href = url;
-            a.download = `CAPACITIUMX_V329_${Date.now()}.mp4`;
+            a.download = `VIDEO_CAPACITIUMX.mp4`;
             a.click();
             st.innerText = "✅ ¡VIDEO DESCARGADO!";
         } catch (e) {
-            st.innerText = "❌ ERROR. REINTENTA CON OTRA FOTO.";
+            st.innerText = "❌ ERROR DE RENDER. RECARGA LA PÁGINA.";
             console.error(e);
         }
     }
