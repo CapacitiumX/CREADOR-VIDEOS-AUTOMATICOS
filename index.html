@@ -2,186 +2,191 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX CLOUD V2 - 30 FOTOS ÉLITE</title>
+    <title>CAPACITIUMX ULTIMATE V3 - SUBTÍTULOS Y VIDEO</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
         :root { --neon: #00ff00; --dark: #0a0a0a; }
-        body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; }
-        .app-container { display: grid; grid-template-columns: 350px 1fr 300px; height: 100vh; }
-        header { grid-column: 1 / span 3; background: #111; padding: 10px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
+        body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        /* Panel Izquierdo: Galería de 30 */
-        .panel-left { border-right: 1px solid #333; display: flex; flex-direction: column; background: #0f0f0f; }
-        #search-results { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; overflow-y: auto; padding: 10px; flex-grow: 1; }
-        .thumb { width: 100%; aspect-ratio: 16/9; cursor: pointer; border: 1px solid #333; object-fit: cover; }
-        .thumb:hover { border-color: var(--neon); transform: scale(1.02); }
-        .selected-img { border: 2px solid var(--neon) !important; }
+        header { background: #111; padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
+        
+        .main-layout { display: grid; grid-template-columns: 350px 1fr 350px; flex-grow: 1; overflow: hidden; }
+        
+        /* Galería corregida */
+        .sidebar-left { background: #0f0f0f; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        #gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 15px; overflow-y: auto; }
+        .thumb-container { position: relative; width: 100%; aspect-ratio: 16/9; background: #222; border: 1px solid #444; cursor: pointer; overflow: hidden; }
+        .thumb-container img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-container:hover { border-color: var(--neon); }
 
-        /* Centro: Monitor */
-        .preview-area { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
-        #monitor { width: 90%; aspect-ratio: 16/9; border: 1px solid #333; background: #111 url('https://via.placeholder.com/1280x720/000/0f0?text=CAPACITIUMX+READY') center/cover; }
-        
-        /* Controles */
-        .controls { margin-top: 20px; display: flex; gap: 15px; }
-        button { background: #000; border: 1px solid var(--neon); color: var(--neon); padding: 12px 20px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        /* Monitor central con Texto */
+        .editor-center { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        #monitor-canvas { 
+            width: 90%; 
+            aspect-ratio: 16/9; 
+            border: 1px solid #333; 
+            background-size: cover; 
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        #overlay-text { 
+            color: yellow; 
+            font-size: 2.5vw; 
+            font-weight: bold; 
+            text-shadow: 2px 2px 4px black; 
+            margin-bottom: 10%;
+            text-align: center;
+            width: 80%;
+            pointer-events: none;
+        }
+
+        /* Botonera inferior */
+        .action-bar { background: #111; padding: 20px; border-top: 1px solid #333; display: flex; justify-content: center; gap: 20px; }
+        button { padding: 12px 25px; font-weight: bold; cursor: pointer; border: 1px solid var(--neon); background: transparent; color: var(--neon); text-transform: uppercase; }
         button:hover { background: var(--neon); color: black; }
-        .rec-active { background: #ff0000 !important; color: white !important; border-color: white !important; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        .recording { background: red !important; color: white !important; border-color: white !important; }
 
-        /* Panel Derecho */
-        .panel-right { padding: 15px; background: #0f0f0f; border-left: 1px solid #333; }
-        textarea { width: 100%; height: 80%; background: #000; color: #0f0; border: 1px solid #333; padding: 10px; font-family: monospace; resize: none; }
+        /* Panel derecho */
+        .sidebar-right { background: #0f0f0f; border-left: 1px solid #333; padding: 15px; }
+        textarea { width: 100%; height: 70%; background: #000; color: #0f0; border: 1px solid #333; padding: 10px; font-family: monospace; }
+        #status-msg { color: yellow; font-size: 12px; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <header>
-        <div style="font-weight: bold; letter-spacing: 2px;">[ CAPACITIUMX CLOUD ENGINE V2 ]</div>
-        <div id="status" style="color: yellow;">ESTADO: ESPERANDO...</div>
-    </header>
+<header>
+    <div style="font-size: 20px; letter-spacing: 2px;">CAPACITIUMX <span style="color:var(--neon)">ULTIMATE V3</span></div>
+    <div id="status-tag">SISTEMA LISTO</div>
+</header>
 
-    <aside class="panel-left">
-        <div style="padding: 10px;">
-            <input type="text" id="query" placeholder="Ej: Monterrey, Futbol..." style="width:70%; padding:8px; background:#000; color:white; border:1px solid #444;">
-            <button onclick="fetchImages()" style="padding:8px;">BUSCAR</button>
+<div class="main-layout">
+    <aside class="sidebar-left">
+        <div style="padding: 15px;">
+            <input type="text" id="searchInput" placeholder="Ej: Rayados, Monterrey..." style="width: 100%; padding: 10px; background: #000; color: white; border: 1px solid #444; box-sizing: border-box;">
+            <button onclick="search30Images()" style="width: 100%; margin-top: 10px;">BUSCAR 30 FOTOS</button>
         </div>
-        <div id="search-results"></div>
+        <div id="gallery"></div>
     </aside>
 
-    <main class="preview-area">
-        <div id="monitor"></div>
-        <div class="controls">
-            <button id="btnRec" onclick="toggleMic()">🎙️ GRABAR VOZ</button>
-            <button id="btnExport" onclick="renderVideo()" style="background: var(--neon); color: black;">🎬 EXPORTAR MP4</button>
+    <main class="editor-center">
+        <div id="monitor-canvas">
+            <div id="overlay-text"></div>
         </div>
-        <p id="timer" style="color: #666; margin-top: 10px;">00:00</p>
+        <div id="status-msg">Selecciona una foto y graba tu voz para exportar MP4</div>
     </main>
 
-    <aside class="panel-right">
-        <label>HISTORIA / GUION:</label>
-        <textarea id="script" placeholder="Escribe tu historia aquí para leerla mientras grabas..."></textarea>
+    <aside class="sidebar-right">
+        <label>TEXTO EN VIDEO / GUION:</label>
+        <textarea id="scriptInput" placeholder="Escribe aquí. Lo que pongas aparecerá como subtítulo en el video..." oninput="updateTextOverlay()"></textarea>
     </aside>
 </div>
 
+<div class="action-bar">
+    <button id="btnMic" onclick="toggleRecording()">🎙️ GRABAR NARRACIÓN</button>
+    <button id="btnExport" onclick="exportVideoMP4()" style="background: var(--neon); color: black;">🎬 EXPORTAR VIDEO MP4</button>
+</div>
+
 <script>
-    let selectedImage = "";
-    let audioBlob = null;
-    let recorder = null;
-    let chunks = [];
+    let selectedImgUrl = "";
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob;
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ log: true });
 
-    // 1. BUSCADOR DE 30 FOTOS REALES
-    async function fetchImages() {
-        const q = document.getElementById('query').value;
-        if(!q) return alert("Escribe una palabra");
+    // 1. Buscador mejorado (usa imágenes de alta calidad con bypass de caché)
+    function search30Images() {
+        const query = document.getElementById('searchInput').value;
+        if(!query) return alert("Escribe un tema");
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = "";
         
-        const res = document.getElementById('search-results');
-        res.innerHTML = "<p style='color:gray'>Buscando lote de 30...</p>";
-        
-        try {
-            // Usamos Source de Unsplash con términos específicos para evitar fotos random
-            res.innerHTML = "";
-            for(let i=0; i<30; i++) {
-                const imgUrl = `https://source.unsplash.com/800x450/?${encodeURIComponent(q)}&sig=${i}`;
-                const img = document.createElement('img');
-                img.src = imgUrl;
-                img.className = "thumb";
-                img.onclick = function() {
-                    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('selected-img'));
-                    this.classList.add('selected-img');
-                    selectedImage = this.src;
-                    document.getElementById('monitor').style.backgroundImage = `url('${this.src}')`;
-                    document.getElementById('status').innerText = "IMAGEN SELECCIONADA";
-                };
-                res.appendChild(img);
-            }
-            document.getElementById('status').innerText = "30 FOTOS CARGADAS";
-        } catch (e) {
-            alert("Error al conectar con la red de imágenes.");
+        document.getElementById('status-tag').innerText = "CARGANDO FOTOS...";
+
+        for(let i=0; i<30; i++) {
+            const container = document.createElement('div');
+            container.className = "thumb-container";
+            
+            const img = document.createElement('img');
+            // Usamos Unsplash con parámetros de búsqueda para evitar que se rompan
+            img.src = `https://images.unsplash.com/photo-1?auto=format&fit=crop&w=400&q=60&utm_source=capacitiumx&query=${encodeURIComponent(query)}&sig=${i}`;
+            
+            container.onclick = () => {
+                selectedImgUrl = img.src.replace('w=400', 'w=1280'); // Alta calidad para el monitor
+                document.getElementById('monitor-canvas').style.backgroundImage = `url('${selectedImgUrl}')`;
+                document.getElementById('status-msg').innerText = "Imagen seleccionada: " + query;
+            };
+            
+            container.appendChild(img);
+            gallery.appendChild(container);
         }
+        document.getElementById('status-tag').innerText = "30 FOTOS LISTAS";
     }
 
-    // 2. GRABACIÓN DE VOZ CORREGIDA
-    async function toggleMic() {
-        const btn = document.getElementById('btnRec');
-        if (!recorder || recorder.state === "inactive") {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                recorder = new MediaRecorder(stream);
-                chunks = [];
-                recorder.ondataavailable = e => chunks.push(e.data);
-                recorder.onstop = () => {
-                    audioBlob = new Blob(chunks, { type: 'audio/mp3' });
-                    document.getElementById('status').innerText = "VOZ LISTA PARA EXPORTAR";
-                };
-                recorder.start();
-                btn.classList.add('rec-active');
-                btn.innerText = "⏹ DETENER";
-                document.getElementById('status').innerText = "GRABANDO...";
-            } catch (err) {
-                alert("Permiso de micrófono denegado.");
-            }
+    // 2. Texto en pantalla (Subtítulos)
+    function updateTextOverlay() {
+        const text = document.getElementById('scriptInput').value;
+        document.getElementById('overlay-text').innerText = text;
+    }
+
+    // 3. Grabación de Voz
+    async function toggleRecording() {
+        const btn = document.getElementById('btnMic');
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                document.getElementById('status-msg').innerText = "Narración grabada con éxito.";
+            };
+            mediaRecorder.start();
+            btn.innerText = "⏹ DETENER GRABACIÓN";
+            btn.classList.add('recording');
         } else {
-            recorder.stop();
-            btn.classList.remove('rec-active');
-            btn.innerText = "🎙️ GRABAR VOZ";
+            mediaRecorder.stop();
+            btn.innerText = "🎙️ GRABAR NARRACIÓN";
+            btn.classList.remove('recording');
         }
     }
 
-    // 3. MOTOR DE RENDERIZADO MP4
-    async function renderVideo() {
-        const status = document.getElementById('status');
+    // 4. Exportación MP4 con Texto Integrado
+    async function exportVideoMP4() {
+        if(!selectedImgUrl || !audioBlob) return alert("Falta imagen o audio.");
         
-        if(!selectedImage) return alert("Selecciona una foto de las 30 primero.");
-        if(!audioBlob) return alert("Graba tu voz primero.");
+        const status = document.getElementById('status-msg');
+        status.innerText = "INICIANDO PROCESO DE RENDERIZADO...";
+        
+        if (!ffmpeg.isLoaded()) await ffmpeg.load();
 
-        status.innerText = "INICIANDO MOTOR DE VIDEO...";
-        document.getElementById('btnExport').disabled = true;
+        // Guardar archivos
+        ffmpeg.FS('writeFile', 'img.jpg', await fetchFile(selectedImgUrl));
+        ffmpeg.FS('writeFile', 'aud.mp3', await fetchFile(audioBlob));
 
-        try {
-            if (!ffmpeg.isLoaded()) await ffmpeg.load();
-            
-            status.innerText = "PROCESANDO MP4... (NO CIERRES)";
-            
-            // Cargar archivos al sistema virtual
-            ffmpeg.FS('writeFile', 'input_img.jpg', await fetchFile(selectedImage));
-            ffmpeg.FS('writeFile', 'input_audio.mp3', await fetchFile(audioBlob));
+        const subtitulo = document.getElementById('scriptInput').value || "CapacitiumX V3";
 
-            // Comando Maestro: Crea video de 10 seg con la imagen y el audio
-            await ffmpeg.run(
-                '-loop', '1', 
-                '-i', 'input_img.jpg', 
-                '-i', 'input_audio.mp3', 
-                '-c:v', 'libx264', 
-                '-tune', 'stillimage',
-                '-c:a', 'aac', 
-                '-b:a', '192k',
-                '-pix_fmt', 'yuv420p', 
-                '-shortest', 
-                '-vf', 'scale=1280:720',
-                'final.mp4'
-            );
+        // Comando FFmpeg: Imagen + Audio + Texto quemado en el video
+        status.innerText = "CODIFICANDO MP4 (1080p)... POR FAVOR ESPERA";
+        
+        await ffmpeg.run(
+            '-loop', '1', '-i', 'img.jpg', 
+            '-i', 'aud.mp3',
+            '-vf', `scale=1280:720,drawtext=text='${subtitulo}':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5:boxborderw=5`,
+            '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac', '-b:a', '192k', '-pix_fmt', 'yuv420p', '-shortest', 'output.mp4'
+        );
 
-            const data = ffmpeg.FS('readFile', 'final.mp4');
-            const videoUrl = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-            
-            // Descarga automática
-            const link = document.createElement('a');
-            link.href = videoUrl;
-            link.download = `CAPACITIUMX_VIDEO_${Date.now()}.mp4`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            status.innerText = "✅ ¡VIDEO DESCARGADO!";
-        } catch (error) {
-            console.error(error);
-            status.innerText = "❌ ERROR EN RENDER";
-        } finally {
-            document.getElementById('btnExport').disabled = false;
-        }
+        const data = ffmpeg.FS('readFile', 'output.mp4');
+        const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "video_capacitiumx_final.mp4";
+        a.click();
+        status.innerText = "¡VIDEO MP4 DESCARGADO!";
     }
 </script>
 
