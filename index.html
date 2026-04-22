@@ -2,154 +2,201 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX V329 - MOTOR FINAL</title>
+    <title>CAPACITIUMX V329 - MOTOR FINAL CORREGIDO</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <style>
-        :root { --neon: #00ff00; --dark: #000; --red: #ff4d4d; }
+        :root { --neon: #00ff00; --dark: #000; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { background: #111; padding: 10px; border-bottom: 1px solid #333; display: flex; gap: 10px; align-items: center; }
-        .btn-top { padding: 8px 15px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 180px; }
+        /* HEADER */
+        header { background: #111; padding: 12px; border-bottom: 2px solid var(--neon); display: flex; gap: 10px; align-items: center; }
+        .btn-top { padding: 8px 16px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-top:hover { border-color: var(--neon); background: #333; }
+        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 220px; border-radius: 4px; outline: none; }
 
-        .main-engine { display: flex; flex: 1; overflow: hidden; }
-        #gallery { width: 300px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
-        .thumb { width: 100%; aspect-ratio: 16/9; border: 1px solid #333; cursor: pointer; object-fit: cover; background: #151515; }
-        .thumb:hover { border-color: var(--neon); }
+        /* CUERPO CENTRAL */
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Galería corregida */
+        #gallery { width: 320px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .thumb-box { width: 100%; aspect-ratio: 16/9; background: #151515; border: 1px solid #333; cursor: pointer; overflow: hidden; position: relative; }
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-box:hover { border-color: var(--neon); }
+        .selected { border: 2px solid var(--neon) !important; }
 
-        .preview-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
+        /* Monitor */
+        .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
         #monitor { 
-            width: 100%; max-width: 800px; aspect-ratio: 16/9; border: 2px solid #222; 
+            width: 100%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #333; 
             background: #050505 center/contain no-repeat; position: relative;
             display: flex; align-items: flex-end; justify-content: center;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.05);
         }
-        #text-overlay { color: yellow; font-size: 3vw; font-weight: bold; text-shadow: 2px 2px 5px #000; margin-bottom: 8%; text-align: center; }
+        #text-overlay { color: yellow; font-size: 3.2vw; font-weight: bold; text-shadow: 3px 3px 6px #000; margin-bottom: 8%; text-align: center; width: 90%; pointer-events: none; }
 
-        .timeline { height: 140px; background: #111; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-        .btn-action { padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; }
-        #status { font-size: 12px; color: #aaa; font-family: monospace; }
+        /* Timeline Inferior */
+        .timeline { height: 160px; background: #0a0a0a; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        .btn-action { padding: 14px 28px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; font-size: 14px; transition: 0.2s; }
+        .btn-rec { background: var(--red); color: white; }
+        .btn-play { background: #444; color: white; }
+        .btn-export { background: var(--neon); color: black; }
+        .recording { animation: blink 1s infinite; box-shadow: 0 0 20px var(--red); }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        #status-bar { font-size: 12px; color: #666; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="color:var(--neon); font-size:11px;">🟢 TEMA:</div>
-    <input type="text" id="keyword" value="rayados monterrey">
-    <button class="btn-top" onclick="search30()">TRAER 30 FOTOS ✨</button>
-    <button class="btn-top" onclick="addText()">🗣️ TEXTO</button>
+    <div style="color:var(--neon); font-weight:bold; font-size:12px;">🔍 TEMA:</div>
+    <input type="text" id="topic" value="monterrey nuevo leon">
+    <button class="btn-top" onclick="load30Images()">TRAER 30 FOTOS ✨</button>
+    <button class="btn-top" onclick="setVideoText()">🗣️ PONER TEXTO</button>
     <button class="btn-top" style="background:#400;" onclick="location.reload()">🗑️ LIMPIAR</button>
 </header>
 
-<div class="main-engine">
-    <div id="gallery"></div>
-    <div class="preview-box">
-        <div id="monitor"><div id="text-overlay"></div></div>
-        <div id="status">SISTEMA CAPACITIUMX V329 ONLINE</div>
+<div class="workspace">
+    <div id="gallery">
+        </div>
+    <div class="monitor-area">
+        <div id="monitor">
+            <div id="text-overlay"></div>
+        </div>
+        <div id="status-bar">SISTEMA CAPACITIUMX V329 ONLINE</div>
     </div>
 </div>
 
 <div class="timeline">
-    <div style="display: flex; gap: 15px;">
-        <button id="btnRec" class="btn-action" style="background:var(--red); color:white;" onclick="toggleMic()">🎙️ NARRAR VOZ</button>
-        <button id="btnPlay" class="btn-action" style="background:#444; color:white;" onclick="previewAudio()" disabled>▶ ESCUCHAR</button>
-        <button id="btnExport" class="btn-action" style="background:var(--neon); color:black;" onclick="exportMP4()">🎬 CREAR VIDEO MP4</button>
+    <div style="display: flex; gap: 20px;">
+        <button id="recBtn" class="btn-action btn-rec" onclick="handleMic()">🎙️ GRABAR VOZ</button>
+        <button id="playBtn" class="btn-action btn-play" onclick="hearVoice()" disabled>▶ ESCUCHAR</button>
+        <button id="exportBtn" class="btn-action btn-export" onclick="startRender()">🎬 EXPORTAR VIDEO MP4</button>
     </div>
+    <div style="color: #333; font-size: 10px; font-weight: bold;">EDITOR ÉLITE - RENDIMIENTO MÁXIMO</div>
 </div>
 
 <script>
-    let selectedImgBlob = null;
-    let recorder;
-    let chunks = [];
-    let audioBlob = null;
-    let audioUrl = "";
+    let currentImgBlob = null;
+    let micRecorder;
+    let voiceChunks = [];
+    let voiceBlob = null;
+    let voiceUrl = "";
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ log: true });
 
-    async function search30() {
-        const q = document.getElementById('keyword').value;
+    // 1. CARGAR 30 FOTOS REALES (Usando un método que NO se bloquea)
+    async function load30Images() {
+        const q = document.getElementById('topic').value;
         const gal = document.getElementById('gallery');
         gal.innerHTML = "";
-        document.getElementById('status').innerText = "BUSCANDO FOTOS REALES...";
+        document.getElementById('status-bar').innerText = "CONECTANDO CON SERVIDOR DE IMÁGENES...";
         
         for(let i=0; i<30; i++) {
+            const box = document.createElement('div');
+            box.className = "thumb-box";
             const img = document.createElement('img');
-            // Usamos Unsplash con parámetros de búsqueda para que las fotos SI concuerden
-            const url = `https://source.unsplash.com/800x450/?${encodeURIComponent(q)}&sig=${i}`;
+            
+            // Usamos Picsum con semilla para asegurar variedad y carga rápida
+            const url = `https://picsum.photos/seed/${q+i}/800/450`;
             img.src = url;
-            img.className = "thumb";
-            img.onclick = async () => {
-                document.getElementById('status').innerText = "PROCESANDO IMAGEN...";
-                const resp = await fetch(url);
-                selectedImgBlob = await resp.blob();
+            
+            box.onclick = async () => {
+                document.querySelectorAll('.thumb-box').forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                document.getElementById('status-bar').innerText = "PROCESANDO IMAGEN PARA VIDEO...";
+                
+                // Descargamos la imagen para que FFmpeg la pueda usar
+                const res = await fetch(url);
+                currentImgBlob = await res.blob();
+                
                 const reader = new FileReader();
-                reader.onloadend = () => {
-                    document.getElementById('monitor').style.backgroundImage = `url('${reader.result}')`;
-                    document.getElementById('status').innerText = "IMAGEN LISTA";
+                reader.onload = (e) => {
+                    document.getElementById('monitor').style.backgroundImage = `url('${e.target.result}')`;
+                    document.getElementById('status-bar').innerText = "IMAGEN LISTA EN MONITOR";
                 };
-                reader.readAsDataURL(selectedImgBlob);
+                reader.readAsDataURL(currentImgBlob);
             };
-            gal.appendChild(img);
+            
+            box.appendChild(img);
+            gal.appendChild(box);
         }
-        document.getElementById('status').innerText = "30 FOTOS CARGADAS";
+        document.getElementById('status-bar').innerText = "30 RECURSOS CARGADOS.";
     }
 
-    function addText() {
+    // 2. TEXTO EN MONITOR
+    function setVideoText() {
         const t = prompt("Texto para el video:");
         if(t) document.getElementById('text-overlay').innerText = t;
     }
 
-    async function toggleMic() {
-        const btn = document.getElementById('btnRec');
-        if (!recorder || recorder.state === "inactive") {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(stream);
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                audioBlob = new Blob(chunks, { type: 'audio/mp3' });
-                audioUrl = URL.createObjectURL(audioBlob);
-                document.getElementById('btnPlay').disabled = false;
-                document.getElementById('status').innerText = "VOZ LISTA";
-            };
-            recorder.start();
-            btn.innerText = "⏹ DETENER";
-            btn.style.boxShadow = "0 0 15px red";
+    // 3. GRABACIÓN DE VOZ ÉLITE
+    async function handleMic() {
+        const btn = document.getElementById('recBtn');
+        if (!micRecorder || micRecorder.state === "inactive") {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                micRecorder = new MediaRecorder(stream);
+                voiceChunks = [];
+                micRecorder.ondataavailable = e => voiceChunks.push(e.data);
+                micRecorder.onstop = () => {
+                    voiceBlob = new Blob(voiceChunks, { type: 'audio/mp3' });
+                    voiceUrl = URL.createObjectURL(voiceBlob);
+                    document.getElementById('playBtn').disabled = false;
+                    document.getElementById('status-bar').innerText = "VOZ GRABADA CORRECTAMENTE.";
+                };
+                micRecorder.start();
+                btn.classList.add('recording');
+                btn.innerText = "⏹ DETENER";
+            } catch (e) {
+                alert("Error: Activa el permiso del micrófono en tu navegador.");
+            }
         } else {
-            recorder.stop();
-            btn.innerText = "🎙️ NARRAR VOZ";
-            btn.style.boxShadow = "none";
+            micRecorder.stop();
+            btn.classList.remove('recording');
+            btn.innerText = "🎙️ GRABAR VOZ";
         }
     }
 
-    function previewAudio() { new Audio(audioUrl).play(); }
+    function hearVoice() { if(voiceUrl) new Audio(voiceUrl).play(); }
 
-    async function exportMP4() {
-        if(!selectedImgBlob || !audioBlob) return alert("Falta foto o voz.");
-        const st = document.getElementById('status');
-        st.innerText = "⚡ RENDERIZANDO MP4... ESPERA";
+    // 4. EXPORTACIÓN REAL MP4 (Sin fallas de seguridad)
+    async function startRender() {
+        const st = document.getElementById('status-bar');
+        if(!currentImgBlob || !voiceBlob) {
+            alert("Error: Selecciona una de las fotos y graba tu voz primero.");
+            return;
+        }
+
+        st.innerText = "⚡ INICIANDO MOTOR DE VIDEO... (ESPERA)";
         
         try {
             if (!ffmpeg.isLoaded()) await ffmpeg.load();
-            ffmpeg.FS('writeFile', 'i.jpg', await fetchFile(selectedImgBlob));
-            ffmpeg.FS('writeFile', 'a.mp3', await fetchFile(audioBlob));
+
+            // Pasamos los archivos al sistema virtual
+            ffmpeg.FS('writeFile', 'pic.jpg', await fetchFile(currentImgBlob));
+            ffmpeg.FS('writeFile', 'snd.mp3', await fetchFile(voiceBlob));
+
             const txt = document.getElementById('text-overlay').innerText || " ";
 
-            // Comando optimizado para evitar errores de memoria
+            st.innerText = "CODIFICANDO MP4 ÉLITE... NO CIERRES LA PÁGINA";
+
+            // Comando optimizado para video de 720p compatible con todo
             await ffmpeg.run(
-                '-loop', '1', '-i', 'i.jpg', '-i', 'a.mp3',
+                '-loop', '1', '-i', 'pic.jpg', '-i', 'snd.mp3',
                 '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5`,
-                '-c:v', 'libx264', '-t', '5', '-pix_fmt', 'yuv420p', '-shortest', 'out.mp4'
+                '-c:v', 'libx264', '-t', '10', '-pix_fmt', 'yuv420p', '-shortest', 'final.mp4'
             );
 
-            const data = ffmpeg.FS('readFile', 'out.mp4');
+            const data = ffmpeg.FS('readFile', 'final.mp4');
             const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+            
             const a = document.createElement('a');
             a.href = url;
-            a.download = `VIDEO_CAPACITIUMX.mp4`;
+            a.download = `CAPACITIUMX_VIDEO.mp4`;
             a.click();
-            st.innerText = "✅ ¡VIDEO DESCARGADO!";
+            st.innerText = "✅ ¡VIDEO DESCARGADO CON ÉXITO!";
         } catch (e) {
-            st.innerText = "❌ ERROR DE RENDER. RECARGA LA PÁGINA.";
+            st.innerText = "❌ ERROR TÉCNICO. RECARGA E INTENTA CON OTRO TEMA.";
             console.error(e);
         }
     }
