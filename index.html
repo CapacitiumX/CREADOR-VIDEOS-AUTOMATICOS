@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapacitiumX - Generador Web Gratis</title>
+    <style>
+        :root { --primary: #00ff00; --bg: #050505; --text: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 50px; }
+        .hero { background: #111; padding: 40px 20px; text-align: center; border-bottom: 2px solid var(--primary); }
+        .hero h1 { color: var(--primary); margin: 0; font-size: 1.8rem; text-transform: uppercase; }
+        .search-container { max-width: 500px; margin: -30px auto 20px; padding: 0 20px; }
+        .search-box { background: #222; padding: 10px; border-radius: 10px; display: flex; border: 1px solid #444; }
+        .search-box input { flex: 1; border: none; background: transparent; color: white; padding: 10px; font-size: 16px; outline: none; }
+        .btn-search { background: var(--primary); color: black; border: none; padding: 10px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .results { max-width: 600px; margin: auto; padding: 20px; }
+        .domain-card { background: #111; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
+        .domain-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); margin-bottom: 10px; }
+        .instructions { background: #1a1a1a; padding: 15px; border-left: 4px solid var(--primary); font-size: 0.9rem; color: #ccc; }
+        .badge { background: #065f46; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>CapacitiumX Free Web Gen</h1>
+        <p style="opacity: 0.8;">Crea tu presencia en internet 100% GRATIS</p>
+    </div>
+
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="domainInput" placeholder="Nombre de tu proyecto..." onkeypress="if(event.key==='Enter') generateFreeWeb()">
+            <button class="btn-search" onclick="generateFreeWeb()">GENERAR</button>
+        </div>
+    </div>
+
+    <div class="results" id="resultsArea">
+        <div style="text-align: center; color: #64748b; margin-top: 40px;">
+            <p>Escribe el nombre de tu marca para crear tu web gratuita</p>
+        </div>
+    </div>
+
+    <script>
+        function generateFreeWeb() {
+            const input = document.getElementById('domainInput').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const resultsArea = document.getElementById('resultsArea');
+            
+            if(!input) return alert("Escribe un nombre");
+
+            resultsArea.innerHTML = `
+                <div class="domain-card">
+                    <div class="domain-name">${input}.github.io <span class="badge">100% GRATIS</span></div>
+                    <p>Esta será tu dirección profesional permanente sin pagar renovaciones.</p>
+                    
+                    <div class="instructions">
+                        <strong>PASOS PARA ACTIVARLA YA:</strong><br>
+                        1. Crea un repositorio en tu GitHub llamado: <b>${input}.github.io</b><br>
+                        2. Sube tu archivo <b>index.html</b> ahí.<br>
+                        3. ¡Listo! Tu página se verá en todo el mundo bajo ese nombre.
+                    </div>
+                    <br>
+                    <button class="btn-search" style="width:100%" onclick="window.open('https://github.com/new')">CREAR REPOSITORIO AHORA</button>
+                </div>
+
+                <div class="domain-card" style="opacity: 0.7">
+                    <div class="domain-name">${input}.netlify.app <span class="badge">GRATIS</span></div>
+                    <p>Opción alternativa de hosting gratuito de alta velocidad.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
