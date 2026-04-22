@@ -2,43 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX V329 - MOTOR INFALIBLE</title>
+    <title>CAPACITIUMX V329 - WEB ÉLITE TOTAL</title>
     <style>
-        :root { --neon: #00ff00; --dark: #000; --red: #ff3333; }
+        :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
+        /* BARRA SUPERIOR (ESTILO TU PYTHON) */
         header { background: #111; padding: 12px; border-bottom: 2px solid var(--neon); display: flex; gap: 10px; align-items: center; }
-        .btn-top { padding: 8px 16px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 220px; }
+        .btn-top { padding: 8px 15px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-size: 12px; font-weight: bold; }
+        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 200px; }
 
+        /* ÁREA DE TRABAJO */
         .workspace { display: flex; flex: 1; overflow: hidden; }
         #gallery { width: 300px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .thumb-box { width: 100%; aspect-ratio: 16/9; background: #151515; border: 1px solid #333; cursor: pointer; overflow: hidden; }
+        .thumb-box { width: 100%; aspect-ratio: 16/9; background: #151515; border: 1px solid #333; cursor: pointer; }
         .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
         .selected { border: 2px solid var(--neon) !important; }
 
-        .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
-        
-        /* El Monitor que se convertirá en Video */
-        #video-canvas-container {
-            width: 100%; max-width: 800px; aspect-ratio: 16/9; border: 1px solid #333;
-            position: relative; overflow: hidden; background: #050505;
-            display: flex; align-items: center; justify-content: center;
-        }
-        #main-photo { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #text-overlay { 
-            position: absolute; bottom: 12%; width: 100%; text-align: center;
-            color: yellow; font-size: 3.5vw; font-weight: bold; text-shadow: 3px 3px 6px #000;
-            pointer-events: none; z-index: 10; font-family: 'Impact', sans-serif;
-        }
+        /* MONITOR (EL LIENZO DE VIDEO) */
+        .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
+        #video-canvas { width: 90%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #333; background: #000; }
 
-        .timeline { height: 150px; background: #0a0a0a; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        /* TIMELINE Y CONTROLES */
+        .timeline { height: 160px; background: #0a0a0a; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
         .btn-action { padding: 14px 28px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; font-size: 14px; }
         .btn-rec { background: var(--red); color: white; }
         .btn-export { background: var(--neon); color: black; }
         .recording { animation: blink 1s infinite; box-shadow: 0 0 20px var(--red); }
         @keyframes blink { 50% { opacity: 0.5; } }
-        #status-msg { font-size: 12px; color: #666; margin-top: 10px; }
+        #status { font-size: 12px; color: #666; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -46,38 +38,38 @@
 <header>
     <div style="color:var(--neon); font-weight:bold; font-size:11px;">🔍 TEMA:</div>
     <input type="text" id="topic" value="monterrey rayados">
-    <button class="btn-top" onclick="fetch30()">TRAER 30 FOTOS ✨</button>
-    <button class="btn-top" onclick="setSub()">PONER TEXTO</button>
+    <button class="btn-top" onclick="searchImages()">TRAER 30 FOTOS ✨</button>
+    <button class="btn-top" onclick="addText()">PONER TEXTO</button>
     <button class="btn-top" style="background:#400;" onclick="location.reload()">🗑️ LIMPIAR</button>
 </header>
 
 <div class="workspace">
     <div id="gallery"></div>
     <div class="monitor-area">
-        <div id="video-canvas-container">
-            <img id="main-photo" src="">
-            <div id="text-overlay"></div>
-        </div>
-        <div id="status-msg">MODO: CAPTURA DIRECTA (SIN ERRORES)</div>
+        <canvas id="video-canvas" width="1280" height="720"></canvas>
+        <div id="status">MODO: CAPTURA DE LIENZO (ESTILO PYTHON)</div>
     </div>
 </div>
 
 <div class="timeline">
     <div style="display: flex; gap: 20px;">
-        <button id="recBtn" class="btn-action btn-rec" onclick="startCapture()">🎙️ NARRAR Y GENERAR VIDEO</button>
-        <button id="dlBtn" class="btn-action btn-export" onclick="downloadMp4()" disabled>📥 DESCARGAR VIDEO MP4</button>
+        <button id="recBtn" class="btn-action btn-rec" onclick="startProduction()">🎙️ NARRAR Y CREAR VIDEO</button>
+        <button id="dlBtn" class="btn-action btn-export" onclick="downloadVideo()" disabled>📥 DESCARGAR MP4</button>
     </div>
-    <div style="color: #333; font-size: 10px; font-weight: bold;">CAPACITIUMX V329 - TECNOLOGÍA ANTIBLOQUEO</div>
 </div>
 
 <script>
+    const canvas = document.getElementById('video-canvas');
+    const ctx = canvas.getContext('2d');
     let recorder;
     let chunks = [];
-    let videoBlob;
     let isRecording = false;
+    let videoBlob;
+    let currentImg = new Image();
+    let overlayText = "";
 
-    // 1. CARGAR 30 FOTOS (Referencia Real)
-    async function fetch30() {
+    // 1. BUSCADOR DE FOTOS (Picsum para evitar bloqueos)
+    async function searchImages() {
         const q = document.getElementById('topic').value;
         const gal = document.getElementById('gallery');
         gal.innerHTML = "";
@@ -87,11 +79,9 @@
             const img = document.createElement('img');
             img.src = `https://picsum.photos/seed/${q+i}/800/450`;
             box.onclick = () => {
-                document.querySelectorAll('.thumb-box').forEach(b => b.classList.remove('selected'));
-                box.classList.add('selected');
-                const monitorImg = document.getElementById('main-photo');
-                monitorImg.src = img.src;
-                monitorImg.style.display = "block";
+                currentImg.crossOrigin = "anonymous";
+                currentImg.src = img.src;
+                currentImg.onload = () => drawMonitor();
             };
             box.appendChild(img);
             gal.appendChild(box);
@@ -99,26 +89,37 @@
     }
 
     // 2. TEXTO
-    function setSub() {
-        const t = prompt("Escribe el subtítulo:");
-        if(t) document.getElementById('text-overlay').innerText = t;
+    function addText() {
+        overlayText = prompt("Escribe el texto para el video:");
+        drawMonitor();
     }
 
-    // 3. CAPTURA DIRECTA (ESTO NO FALLA NUNCA)
-    async function startCapture() {
-        const btn = document.getElementById('recBtn');
-        const container = document.getElementById('video-canvas-container');
+    // DIBUJAR EN EL MONITOR
+    function drawMonitor() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (currentImg.src) {
+            ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
+        }
+        if (overlayText) {
+            ctx.fillStyle = "yellow";
+            ctx.font = "bold 60px Impact";
+            ctx.textAlign = "center";
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 8;
+            ctx.strokeText(overlayText.toUpperCase(), canvas.width/2, canvas.height * 0.85);
+            ctx.fillText(overlayText.toUpperCase(), canvas.width/2, canvas.height * 0.85);
+        }
+    }
 
+    // 3. MOTOR DE GRABACIÓN (LO QUE VES ES LO QUE SE GRABA)
+    async function startProduction() {
+        const btn = document.getElementById('recBtn');
         if (!isRecording) {
             try {
-                // Pedir micrófono
                 const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const videoStream = canvas.captureStream(30); 
                 
-                // Capturar lo que pasa en el monitor
-                // Usamos captureStream para grabar el "div" directamente
-                const videoStream = container.captureStream ? container.captureStream(30) : container.mozCaptureStream(30);
-
-                // Combinar Audio y Video
                 const combined = new MediaStream([
                     ...videoStream.getVideoTracks(),
                     ...audioStream.getAudioTracks()
@@ -131,32 +132,33 @@
                 recorder.onstop = () => {
                     videoBlob = new Blob(chunks, { type: 'video/webm' });
                     document.getElementById('dlBtn').disabled = false;
-                    document.getElementById('status-msg').innerText = "VIDEO LISTO.";
                 };
 
                 recorder.start();
                 isRecording = true;
                 btn.innerText = "⏹ DETENER Y GUARDAR";
                 btn.classList.add('recording');
-                document.getElementById('status-msg').innerText = "GRABANDO... HABLA AHORA.";
             } catch (err) {
-                alert("Error: Activa el permiso del micrófono.");
+                alert("Error: Activa el micrófono.");
             }
         } else {
             recorder.stop();
             isRecording = false;
-            btn.innerText = "🎙️ NARRAR Y GENERAR VIDEO";
+            btn.innerText = "🎙️ NARRAR Y CREAR VIDEO";
             btn.classList.remove('recording');
         }
     }
 
-    function downloadMp4() {
+    function downloadVideo() {
         const url = URL.createObjectURL(videoBlob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `CAPACITIUMX_${Date.now()}.webm`;
         a.click();
     }
+
+    // Dibujo inicial
+    drawMonitor();
 </script>
 
 </body>
