@@ -2,77 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX V329 - MOTOR FINAL CORREGIDO</title>
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
+    <title>CAPACITIUMX V329 - FIX FINAL</title>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
     <style>
-        :root { --neon: #00ff00; --dark: #000; --red: #ff3333; }
+        :root { --neon: #00ff00; --dark: #000; --red: #ff4d4d; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* HEADER */
         header { background: #111; padding: 12px; border-bottom: 2px solid var(--neon); display: flex; gap: 10px; align-items: center; }
         .btn-top { padding: 8px 16px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        .btn-top:hover { border-color: var(--neon); background: #333; }
-        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 220px; border-radius: 4px; outline: none; }
+        input { background: #000; color: #fff; border: 1px solid #444; padding: 8px; width: 220px; border-radius: 4px; }
 
-        /* CUERPO CENTRAL */
         .workspace { display: flex; flex: 1; overflow: hidden; }
-        
-        /* Galería corregida */
         #gallery { width: 320px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .thumb-box { width: 100%; aspect-ratio: 16/9; background: #151515; border: 1px solid #333; cursor: pointer; overflow: hidden; position: relative; }
+        .thumb-box { width: 100%; aspect-ratio: 16/9; background: #151515; border: 1px solid #333; cursor: pointer; overflow: hidden; }
         .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
-        .thumb-box:hover { border-color: var(--neon); }
         .selected { border: 2px solid var(--neon) !important; }
 
-        /* Monitor */
         .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
         #monitor { 
             width: 100%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #333; 
             background: #050505 center/contain no-repeat; position: relative;
             display: flex; align-items: flex-end; justify-content: center;
-            box-shadow: 0 0 40px rgba(0, 255, 0, 0.05);
         }
-        #text-overlay { color: yellow; font-size: 3.2vw; font-weight: bold; text-shadow: 3px 3px 6px #000; margin-bottom: 8%; text-align: center; width: 90%; pointer-events: none; }
+        #text-overlay { color: yellow; font-size: 3.5vw; font-weight: bold; text-shadow: 3px 3px 6px #000; margin-bottom: 8%; text-align: center; width: 90%; }
 
-        /* Timeline Inferior */
         .timeline { height: 160px; background: #0a0a0a; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-        .btn-action { padding: 14px 28px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; font-size: 14px; transition: 0.2s; }
-        .btn-rec { background: var(--red); color: white; }
-        .btn-play { background: #444; color: white; }
-        .btn-export { background: var(--neon); color: black; }
-        .recording { animation: blink 1s infinite; box-shadow: 0 0 20px var(--red); }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        #status-bar { font-size: 12px; color: #666; font-family: monospace; }
+        .btn-action { padding: 14px 28px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; font-size: 14px; }
+        #status-bar { font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="color:var(--neon); font-weight:bold; font-size:12px;">🔍 TEMA:</div>
+    <div style="color:var(--neon); font-weight:bold;">🔍 TEMA:</div>
     <input type="text" id="topic" value="monterrey nuevo leon">
     <button class="btn-top" onclick="load30Images()">TRAER 30 FOTOS ✨</button>
-    <button class="btn-top" onclick="setVideoText()">🗣️ PONER TEXTO</button>
-    <button class="btn-top" style="background:#400;" onclick="location.reload()">🗑️ LIMPIAR</button>
+    <button class="btn-top" onclick="setVideoText()">PONER TEXTO</button>
+    <button class="btn-top" style="background:#400;" onclick="location.reload()">LIMPIAR</button>
 </header>
 
 <div class="workspace">
-    <div id="gallery">
-        </div>
+    <div id="gallery"></div>
     <div class="monitor-area">
-        <div id="monitor">
-            <div id="text-overlay"></div>
-        </div>
-        <div id="status-bar">SISTEMA CAPACITIUMX V329 ONLINE</div>
+        <div id="monitor"><div id="text-overlay"></div></div>
+        <div id="status-bar">SISTEMA CAPACITIUMX ONLINE</div>
     </div>
 </div>
 
 <div class="timeline">
     <div style="display: flex; gap: 20px;">
-        <button id="recBtn" class="btn-action btn-rec" onclick="handleMic()">🎙️ GRABAR VOZ</button>
-        <button id="playBtn" class="btn-action btn-play" onclick="hearVoice()" disabled>▶ ESCUCHAR</button>
-        <button id="exportBtn" class="btn-action btn-export" onclick="startRender()">🎬 EXPORTAR VIDEO MP4</button>
+        <button id="recBtn" class="btn-action" style="background:var(--red); color:white;" onclick="handleMic()">🎙️ GRABAR VOZ</button>
+        <button id="playBtn" class="btn-action" style="background:#444; color:white;" onclick="hearVoice()" disabled>▶ ESCUCHAR</button>
+        <button id="exportBtn" class="btn-action" style="background:var(--neon); color:black;" onclick="startRender()">🎬 EXPORTAR VIDEO MP4</button>
     </div>
-    <div style="color: #333; font-size: 10px; font-weight: bold;">EDITOR ÉLITE - RENDIMIENTO MÁXIMO</div>
 </div>
 
 <script>
@@ -81,110 +63,84 @@
     let voiceChunks = [];
     let voiceBlob = null;
     let voiceUrl = "";
+    
+    // Configuramos FFmpeg para que NO pida permisos de servidor COOP/COEP
     const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ log: true });
+    const ffmpeg = createFFmpeg({ 
+        log: true,
+        corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
+    });
 
-    // 1. CARGAR 30 FOTOS REALES (Usando un método que NO se bloquea)
     async function load30Images() {
         const q = document.getElementById('topic').value;
         const gal = document.getElementById('gallery');
         gal.innerHTML = "";
-        document.getElementById('status-bar').innerText = "CONECTANDO CON SERVIDOR DE IMÁGENES...";
-        
         for(let i=0; i<30; i++) {
             const box = document.createElement('div');
             box.className = "thumb-box";
             const img = document.createElement('img');
-            
-            // Usamos Picsum con semilla para asegurar variedad y carga rápida
             const url = `https://picsum.photos/seed/${q+i}/800/450`;
             img.src = url;
-            
             box.onclick = async () => {
                 document.querySelectorAll('.thumb-box').forEach(b => b.classList.remove('selected'));
                 box.classList.add('selected');
-                document.getElementById('status-bar').innerText = "PROCESANDO IMAGEN PARA VIDEO...";
-                
-                // Descargamos la imagen para que FFmpeg la pueda usar
                 const res = await fetch(url);
                 currentImgBlob = await res.blob();
-                
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('monitor').style.backgroundImage = `url('${e.target.result}')`;
-                    document.getElementById('status-bar').innerText = "IMAGEN LISTA EN MONITOR";
-                };
+                reader.onload = (e) => document.getElementById('monitor').style.backgroundImage = `url('${e.target.result}')`;
                 reader.readAsDataURL(currentImgBlob);
             };
-            
             box.appendChild(img);
             gal.appendChild(box);
         }
-        document.getElementById('status-bar').innerText = "30 RECURSOS CARGADOS.";
     }
 
-    // 2. TEXTO EN MONITOR
     function setVideoText() {
-        const t = prompt("Texto para el video:");
+        const t = prompt("Texto:");
         if(t) document.getElementById('text-overlay').innerText = t;
     }
 
-    // 3. GRABACIÓN DE VOZ ÉLITE
     async function handleMic() {
         const btn = document.getElementById('recBtn');
         if (!micRecorder || micRecorder.state === "inactive") {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                micRecorder = new MediaRecorder(stream);
-                voiceChunks = [];
-                micRecorder.ondataavailable = e => voiceChunks.push(e.data);
-                micRecorder.onstop = () => {
-                    voiceBlob = new Blob(voiceChunks, { type: 'audio/mp3' });
-                    voiceUrl = URL.createObjectURL(voiceBlob);
-                    document.getElementById('playBtn').disabled = false;
-                    document.getElementById('status-bar').innerText = "VOZ GRABADA CORRECTAMENTE.";
-                };
-                micRecorder.start();
-                btn.classList.add('recording');
-                btn.innerText = "⏹ DETENER";
-            } catch (e) {
-                alert("Error: Activa el permiso del micrófono en tu navegador.");
-            }
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            micRecorder = new MediaRecorder(stream);
+            voiceChunks = [];
+            micRecorder.ondataavailable = e => voiceChunks.push(e.data);
+            micRecorder.onstop = () => {
+                voiceBlob = new Blob(voiceChunks, { type: 'audio/mp3' });
+                voiceUrl = URL.createObjectURL(voiceBlob);
+                document.getElementById('playBtn').disabled = false;
+            };
+            micRecorder.start();
+            btn.innerText = "⏹ DETENER";
         } else {
             micRecorder.stop();
-            btn.classList.remove('recording');
             btn.innerText = "🎙️ GRABAR VOZ";
         }
     }
 
     function hearVoice() { if(voiceUrl) new Audio(voiceUrl).play(); }
 
-    // 4. EXPORTACIÓN REAL MP4 (Sin fallas de seguridad)
     async function startRender() {
         const st = document.getElementById('status-bar');
-        if(!currentImgBlob || !voiceBlob) {
-            alert("Error: Selecciona una de las fotos y graba tu voz primero.");
-            return;
-        }
+        if(!currentImgBlob || !voiceBlob) return alert("Selecciona foto y graba voz.");
 
-        st.innerText = "⚡ INICIANDO MOTOR DE VIDEO... (ESPERA)";
+        st.innerText = "⚡ RENDERIZANDO... ESPERA";
         
         try {
             if (!ffmpeg.isLoaded()) await ffmpeg.load();
 
-            // Pasamos los archivos al sistema virtual
             ffmpeg.FS('writeFile', 'pic.jpg', await fetchFile(currentImgBlob));
             ffmpeg.FS('writeFile', 'snd.mp3', await fetchFile(voiceBlob));
 
             const txt = document.getElementById('text-overlay').innerText || " ";
 
-            st.innerText = "CODIFICANDO MP4 ÉLITE... NO CIERRES LA PÁGINA";
-
-            // Comando optimizado para video de 720p compatible con todo
+            // Comando simplificado para máxima compatibilidad
             await ffmpeg.run(
                 '-loop', '1', '-i', 'pic.jpg', '-i', 'snd.mp3',
-                '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5`,
-                '-c:v', 'libx264', '-t', '10', '-pix_fmt', 'yuv420p', '-shortest', 'final.mp4'
+                '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=60:x=(w-text_w)/2:y=h-150`,
+                '-c:v', 'libx264', '-t', '5', '-pix_fmt', 'yuv420p', '-shortest', 'final.mp4'
             );
 
             const data = ffmpeg.FS('readFile', 'final.mp4');
@@ -192,11 +148,11 @@
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = `CAPACITIUMX_VIDEO.mp4`;
+            a.download = `CAPACITIUMX_MP4.mp4`;
             a.click();
-            st.innerText = "✅ ¡VIDEO DESCARGADO CON ÉXITO!";
+            st.innerText = "✅ DESCARGADO";
         } catch (e) {
-            st.innerText = "❌ ERROR TÉCNICO. RECARGA E INTENTA CON OTRO TEMA.";
+            st.innerText = "❌ ERROR: PRUEBA EN OTRO NAVEGADOR O RECARGA";
             console.error(e);
         }
     }
