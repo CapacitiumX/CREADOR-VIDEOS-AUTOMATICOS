@@ -2,176 +2,175 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CapacitiumX - Cloud Editor Élite</title>
+    <title>CapacitiumX - Editor Pro Similares</title>
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
-        :root { --neon: #00ff00; --dark: #000000; }
-        body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; }
+        :root { --neon: #00ff00; --dark: #000; --red: #ff4444; }
+        body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Barra Superior (Estilo tu captura) */
-        header { 
-            background: #111; padding: 10px; border-bottom: 1px solid #333; 
-            display: flex; gap: 10px; align-items: center; justify-content: flex-start;
-        }
-        .top-btn { padding: 5px 15px; background: #222; border: 1px solid #444; color: white; cursor: pointer; border-radius: 4px; }
-        .top-btn:hover { border-color: var(--neon); }
-        select { background: #222; color: white; border: 1px solid #444; padding: 5px; }
+        /* HEADER - Estilo tu captura */
+        header { background: #111; padding: 10px; border-bottom: 1px solid #333; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-top { padding: 6px 12px; background: #222; border: 1px solid #444; color: white; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-top:hover { border-color: var(--neon); }
+        input { background: #000; color: #fff; border: 1px solid #444; padding: 6px; }
 
-        /* Área de Trabajo */
-        .workspace { display: flex; flex-direction: column; height: calc(100vh - 180px); }
-        .monitor-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #050505; }
-        #main-monitor { 
-            width: 70%; aspect-ratio: 16/9; background: #111 center/cover no-repeat; 
-            border: 1px solid #222; position: relative; display: flex; align-items: flex-end; justify-content: center;
-        }
-        #text-overlay { 
-            color: yellow; font-size: 3vw; font-weight: bold; text-shadow: 2px 2px 5px black;
-            margin-bottom: 5%; text-align: center; width: 90%; pointer-events: none;
-        }
+        /* CUERPO CENTRAL */
+        .main-engine { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
+        /* Galería Izquierda (30 fotos) */
+        #gallery { width: 280px; background: #080808; border-right: 1px solid #222; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; }
+        .thumb { width: 100%; aspect-ratio: 16/9; border: 1px solid #333; cursor: pointer; object-fit: cover; }
+        .thumb:hover { border-color: var(--neon); }
 
-        /* Línea de Tiempo (Inferior) */
-        .timeline { 
-            height: 120px; background: #0a0a0a; border-top: 1px solid #333; 
-            display: flex; gap: 10px; padding: 15px; overflow-x: auto; align-items: center;
+        /* Monitor de Previsualización */
+        .preview-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
+        #monitor { 
+            width: 100%; max-width: 800px; aspect-ratio: 16/9; border: 2px solid #222; 
+            background: #050505 center/contain no-repeat; position: relative;
+            display: flex; align-items: flex-end; justify-content: center;
         }
-        .clip { 
-            min-width: 160px; height: 90px; border: 2px solid var(--neon); 
-            background-size: cover; background-position: center; cursor: pointer;
-            transition: 0.2s;
-        }
-        .clip:hover { transform: scale(1.05); }
+        #text-layer { color: yellow; font-size: 2.5vw; font-weight: bold; text-shadow: 2px 2px 4px #000; margin-bottom: 5%; text-align: center; width: 90%; }
 
-        /* Controles de CapCut */
-        .editor-tools { padding: 10px; background: #111; border-top: 1px solid #333; display: flex; gap: 20px; justify-content: center; }
-        .btn-rec { background: #b91c1c; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        .btn-rec.active { animation: blink 1s infinite; }
-        .btn-export { background: var(--neon); color: black; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-
+        /* LÍNEA DE TIEMPO INFERIOR */
+        .timeline { height: 140px; background: #111; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        .controls-row { display: flex; gap: 15px; margin-bottom: 10px; }
+        
+        /* Botones Acción */
+        .btn-rec { background: var(--red); color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-play { background: #444; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-export { background: var(--neon); color: black; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .recording { animation: blink 1s infinite; box-shadow: 0 0 15px red; }
         @keyframes blink { 50% { opacity: 0.5; } }
+
+        #status { font-size: 11px; color: #888; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="color:var(--neon); font-size: 12px; font-weight: bold;">🔍 TEMA:</div>
-    <input type="text" id="search-input" value="monterrey" style="background:#000; color:white; border:1px solid #444; padding:5px;">
-    <button class="top-btn" onclick="search30()">BUSCAR WEB ✨</button>
-    <select id="voice-sel">
-        <option>Paulina (MX 🇲🇽)</option>
-        <option>Jorge (ES 🇪🇸)</option>
-        <option>Juan (MX 🇲🇽)</option>
-    </select>
-    <button class="top-btn" onclick="addText()">➕ TEXTO</button>
-    <button class="top-btn" style="background:#450a0a;" onclick="clearAll()">🗑️ LIMPIAR</button>
+    <div style="color:var(--neon); font-size:11px; font-weight:bold;">🟢 TEMA:</div>
+    <input type="text" id="keyword" value="monterrey">
+    <button class="btn-top" onclick="searchImages()">BUSCAR WEB ✨</button>
+    <select id="voice"><option>Paulina (MX 🇲🇽)</option></select>
+    <button class="btn-top" onclick="addText()">+ TEXTO</button>
+    <button class="btn-top" style="background:#400;" onclick="location.reload()">🗑️ LIMPIAR</button>
 </header>
 
-<div class="workspace">
-    <div class="monitor-container">
-        <div id="main-monitor">
-            <div id="text-overlay"></div>
+<div class="main-engine">
+    <div id="gallery">
         </div>
+    
+    <div class="preview-box">
+        <div id="monitor">
+            <div id="text-layer"></div>
+        </div>
+        <div id="status">Esperando recursos...</div>
     </div>
 </div>
 
-<div class="editor-tools">
-    <button id="btn-mic" class="btn-rec" onclick="toggleMic()">🎙️ GRABAR NARRACIÓN</button>
-    <button class="btn-export" onclick="exportMP4()">🎬 EXPORTAR VIDEO MP4</button>
-    <div id="status-msg" style="font-size: 12px; color: #666; margin-left: 15px;">Listo.</div>
-</div>
-
-<div class="timeline" id="timeline-flow">
+<div class="timeline">
+    <div class="controls-row">
+        <button id="btnRec" class="btn-rec" onclick="startRec()">🎙️ GRABAR NARRACIÓN</button>
+        <button id="btnPlay" class="btn-play" onclick="playAudio()" disabled>▶ PLAY VOZ</button>
+        <button class="btn-export" onclick="exportVideo()">🎬 EXPORTAR VIDEO MP4</button>
     </div>
+    <div id="audio-container"></div>
+</div>
 
 <script>
-    let selectedImage = "";
+    let selectedImg = "";
     let recorder;
-    let audioChunks = [];
-    let audioBlob;
+    let chunks = [];
+    let audioUrl = "";
+    let audioBlob = null;
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ log: true });
 
-    // 1. BUSCADOR DE 30 FOTOS (Referente al tema)
-    async function search30() {
-        const theme = document.getElementById('search-input').value;
-        const timeline = document.getElementById('timeline-flow');
-        timeline.innerHTML = "<p>Cargando lote de 30 fotos...</p>";
+    // 1. BUSCADOR DE 30 FOTOS (Corregido para que carguen)
+    async function searchImages() {
+        const q = document.getElementById('keyword').value;
+        const gal = document.getElementById('gallery');
+        gal.innerHTML = "Cargando...";
         
-        timeline.innerHTML = "";
+        gal.innerHTML = "";
         for(let i=0; i<30; i++) {
-            const url = `https://images.unsplash.com/photo-1?auto=format&fit=crop&w=800&q=80&query=${encodeURIComponent(theme)}&sig=${i}`;
-            const clip = document.createElement('div');
-            clip.className = "clip";
-            clip.style.backgroundImage = `url('${url}')`;
-            clip.onclick = () => {
-                selectedImage = url;
-                document.getElementById('main-monitor').style.backgroundImage = `url('${url}')`;
+            const img = document.createElement('img');
+            // Usamos un proveedor más estable
+            img.src = `https://picsum.photos/seed/${q+i}/800/450`;
+            img.className = "thumb";
+            img.onclick = () => {
+                selectedImg = img.src;
+                document.getElementById('monitor').style.backgroundImage = `url('${img.src}')`;
+                document.getElementById('status').innerText = "Imagen lista en monitor.";
             };
-            timeline.appendChild(clip);
+            gal.appendChild(img);
         }
     }
 
-    // 2. TEXTO ESTILO CAPCUT
+    // 2. TEXTO
     function addText() {
-        const txt = prompt("Escribe el texto para el video:");
-        if(txt) document.getElementById('text-overlay').innerText = txt;
+        const t = prompt("Texto para el video:");
+        if(t) document.getElementById('text-layer').innerText = t;
     }
 
-    // 3. GRABACIÓN DE VOZ
-    async function toggleMic() {
-        const btn = document.getElementById('btn-mic');
+    // 3. GRABACIÓN DE VOZ (Con Playback)
+    async function startRec() {
+        const btn = document.getElementById('btnRec');
         if (!recorder || recorder.state === "inactive") {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             recorder = new MediaRecorder(stream);
-            audioChunks = [];
-            recorder.ondataavailable = e => audioChunks.push(e.data);
+            chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                document.getElementById('status-msg').innerText = "Voz capturada con éxito.";
+                audioBlob = new Blob(chunks, { type: 'audio/mp3' });
+                audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById('btnPlay').disabled = false;
+                document.getElementById('status').innerText = "Voz guardada. Dale a PLAY para escuchar.";
             };
             recorder.start();
-            btn.classList.add('active');
+            btn.classList.add('recording');
             btn.innerText = "⏹ DETENER";
         } else {
             recorder.stop();
-            btn.classList.remove('active');
+            btn.classList.remove('recording');
             btn.innerText = "🎙️ GRABAR NARRACIÓN";
         }
     }
 
-    // 4. EXPORTACIÓN REAL MP4 (USA TU NAVEGADOR COMO CAPCUT)
-    async function exportMP4() {
-        if(!selectedImage || !audioBlob) return alert("Selecciona una foto y graba tu voz.");
-        
-        const status = document.getElementById('status-msg');
-        status.innerText = "PROCESANDO MP4... (Esto puede tardar)";
-        
-        if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-        ffmpeg.FS('writeFile', 'input_img.jpg', await fetchFile(selectedImage));
-        ffmpeg.FS('writeFile', 'input_audio.mp3', await fetchFile(audioBlob));
-
-        const subtitulo = document.getElementById('text-overlay').innerText || " ";
-
-        // Renderizado con imagen, audio y texto quemado
-        await ffmpeg.run(
-            '-loop', '1', '-i', 'input_img.jpg', 
-            '-i', 'input_audio.mp3',
-            '-vf', `scale=1280:720,drawtext=text='${subtitulo}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-120:box=1:boxcolor=black@0.4`,
-            '-c:v', 'libx264', '-t', '15', '-pix_fmt', 'yuv420p', '-shortest', 'final.mp4'
-        );
-
-        const data = ffmpeg.FS('readFile', 'final.mp4');
-        const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `CAPACITIUMX_${Date.now()}.mp4`;
-        a.click();
-        status.innerText = "¡VIDEO EXPORTADO!";
+    function playAudio() {
+        const a = new Audio(audioUrl);
+        a.play();
     }
 
-    function clearAll() {
-        location.reload();
+    // 4. EXPORTAR MP4 (FARMACIA SIMILARES: Efectivo y Real)
+    async function exportVideo() {
+        if(!selectedImg || !audioBlob) return alert("Falta foto o voz.");
+        
+        const st = document.getElementById('status');
+        st.innerText = "⚡ PROCESANDO MP4... (No cierres la pestaña)";
+
+        if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+        ffmpeg.FS('writeFile', 'f.jpg', await fetchFile(selectedImg));
+        ffmpeg.FS('writeFile', 'a.mp3', await fetchFile(audioBlob));
+
+        const txt = document.getElementById('text-layer').innerText || " ";
+
+        // Comando para unir todo en MP4
+        await ffmpeg.run(
+            '-loop', '1', '-i', 'f.jpg', '-i', 'a.mp3',
+            '-vf', `scale=1280:720,drawtext=text='${txt}':fontcolor=yellow:fontsize=50:x=(w-text_w)/2:y=h-100:box=1:boxcolor=black@0.5`,
+            '-c:v', 'libx264', '-t', '10', '-pix_fmt', 'yuv420p', '-shortest', 'out.mp4'
+        );
+
+        const data = ffmpeg.FS('readFile', 'out.mp4');
+        const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `CAPACITIUMX_WEB_${Date.now()}.mp4`;
+        link.click();
+        st.innerText = "✅ VIDEO DESCARGADO.";
     }
 </script>
 
