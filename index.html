@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX - REACTION FIX</title>
+    <title>CAPACITIUMX - AUDIO MIXER PRO</title>
     <style>
         :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -11,23 +11,18 @@
         .logo { color: var(--neon); font-weight: bold; letter-spacing: 2px; }
 
         .main { display: flex; flex: 1; overflow: hidden; }
-        
-        /* Lateral */
         .sidebar { width: 260px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .btn-load { background: var(--neon); color: black; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; border: none; }
-        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
         .thumb-nav { padding: 8px; background: #222; border: 1px solid #444; font-size: 11px; cursor: pointer; border-radius: 4px; }
         .thumb-nav.active { border-color: var(--neon); background: #111; }
 
-        /* Monitor */
         .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
         #canvas-render { width: 95%; max-width: 900px; aspect-ratio: 16/9; border: 1px solid #333; background: #050505; }
         
-        /* Consola */
         .console { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; }
         .btn-c { background: rgba(0,0,0,0.8); border: 1px solid var(--neon); color: var(--neon); padding: 8px; cursor: pointer; font-size: 10px; font-weight: bold; }
 
-        /* Footer */
         .footer { height: 150px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
         .btn-rec { background: var(--red); color: white; padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; }
         .recording { animation: pulse 1s infinite; }
@@ -37,8 +32,8 @@
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX V329</div>
-    <button class="btn-c" style="background:#444;" onclick="location.reload()">REINICIAR</button>
+    <div class="logo">CAPACITIUMX V329 - AUDIO MIX</div>
+    <div style="color:#666; font-size: 12px;">MEZCLA DE AUDIO: ACTIVADA</div>
 </header>
 
 <div class="main">
@@ -52,15 +47,15 @@
         <div class="console">
             <button class="btn-c" onclick="camMode='full'">👤 YO GRANDE</button>
             <button class="btn-c" onclick="camMode='mini'">🖼️ YO CHICO</button>
-            <button class="btn-c" id="playBtn" onclick="togglePlay()">▶ PLAY / PAUSA</button>
+            <button class="btn-c" id="playBtn" onclick="togglePlay()">▶ PLAY / PAUSA FONDO</button>
         </div>
         <canvas id="canvas-render" width="1280" height="720"></canvas>
     </main>
 </div>
 
 <div class="footer">
-    <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ EMPEZAR GRABACIÓN</button>
-    <button id="dlBtn" style="display:none; background:var(--neon); padding:10px 20px; font-weight:bold; cursor:pointer;" onclick="download()">📥 GUARDAR MP4</button>
+    <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ GRABAR REACCIÓN CON AUDIO ORIGINAL</button>
+    <button id="dlBtn" style="display:none; background:var(--neon); padding:10px 20px; font-weight:bold; cursor:pointer;" onclick="download()">📥 GUARDAR VIDEO FINAL</button>
 </div>
 
 <video id="v-cam" autoplay playsinline style="display:none"></video>
@@ -77,9 +72,9 @@
     let camMode = 'mini'; 
     let camX = 930, camY = 50, camW = 300, camH = 225;
     let dragging = false;
-    let recorder, chunks = [], isRecording = false, finalBlob;
+    let recorder, chunks = [], isRecording = false;
 
-    // 1. CARGA DE MEDIOS (FIXED)
+    // CARGA DE MEDIOS
     function handleFiles(e) {
         Array.from(e.target.files).forEach(file => {
             const url = URL.createObjectURL(file);
@@ -109,6 +104,8 @@
         const m = library[i];
         if (m.type === 'vid') {
             vBg.src = m.url;
+            vBg.muted = false; // IMPORTANTE: No debe estar silenciado
+            vBg.volume = 0.7;  // Volumen del video de fondo al 70% para que tu voz se oiga
             vBg.load();
             vBg.play(); 
         }
@@ -119,43 +116,21 @@
         if (vBg.paused) vBg.play(); else vBg.pause();
     }
 
-    // 2. CÁMARA
-    navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s).catch(e => console.log("Cámara off"));
+    // CÁMARA
+    navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s);
 
-    // Arrastrar cámara
-    canvas.onmousedown = (e) => {
-        const r = canvas.getBoundingClientRect();
-        const x = (e.clientX - r.left) * (canvas.width / r.width);
-        const y = (e.clientY - r.top) * (canvas.height / r.height);
-        if(camMode === 'mini' && x > camX && x < camX + camW && y > camY && y < camY + camH) dragging = true;
-    };
-    window.onmousemove = (e) => {
-        if(dragging) {
-            const r = canvas.getBoundingClientRect();
-            camX = (e.clientX - r.left) * (canvas.width / r.width) - camW/2;
-            camY = (e.clientY - r.top) * (canvas.height / r.height) - camH/2;
-        }
-    };
-    window.onmouseup = () => dragging = false;
-
-    // 3. MOTOR DE DIBUJO (FORZADO)
+    // DIBUJO
     function render() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         if (curIdx !== -1) {
             const m = library[curIdx];
-            if (m.type === 'img' && m.el) {
-                ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
-            } else if (m.type === 'vid') {
-                ctx.drawImage(vBg, 0, 0, canvas.width, canvas.height);
-            }
+            if (m.type === 'img' && m.el) ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
+            else if (m.type === 'vid') ctx.drawImage(vBg, 0, 0, canvas.width, canvas.height);
         }
-
         if (vCam.srcObject) {
-            if (camMode === 'full') {
-                ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
-            } else {
+            if (camMode === 'full') ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
+            else {
                 ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 4;
                 ctx.strokeRect(camX, camY, camW, camH);
                 ctx.drawImage(vCam, camX, camY, camW, camH);
@@ -164,22 +139,43 @@
         requestAnimationFrame(render);
     }
 
-    // 4. GRABACIÓN
+    // GRABACIÓN CON MEZCLA DE AUDIO (EL CORAZÓN DEL PROBLEMA)
     async function toggleCapture() {
         const btn = document.getElementById('recBtn');
         if (!isRecording) {
-            const audio = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-            const stream = canvas.captureStream(30);
+            // 1. Capturar tu voz
+            const micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
             
-            // Unir audio del micro + audio del video de fondo
-            const combined = new MediaStream([...stream.getVideoTracks(), ...audio.getAudioTracks()]);
+            // 2. Capturar video del monitor
+            const canvasStream = canvas.captureStream(30);
+            
+            // 3. CAPTURAR EL AUDIO DEL VIDEO ORIGINAL
+            const audioCtx = new AudioContext();
+            const sourceMic = audioCtx.createMediaStreamSource(micStream);
+            const sourceVid = audioCtx.createMediaElementSource(vBg);
+            const destination = audioCtx.createMediaStreamDestination();
+            
+            // Mezclamos ambos sonidos en el destino final
+            sourceMic.connect(destination);
+            sourceVid.connect(destination);
+            sourceVid.connect(audioCtx.destination); // Esto es para que TÚ lo oigas mientras grabas
+
+            // 4. Unir todo
+            const combined = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...destination.stream.getAudioTracks()
+            ]);
             
             recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9' });
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                finalBlob = new Blob(chunks, { type: 'video/webm' });
+                const blob = new Blob(chunks, { type: 'video/webm' });
                 document.getElementById('dlBtn').style.display = "block";
+                document.getElementById('dlBtn').onclick = () => {
+                    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                    a.download = "REACCION_CON_AUDIO_MIX.webm"; a.click();
+                };
             };
             recorder.start(); isRecording = true;
             btn.innerText = "⏹ DETENER Y GUARDAR"; btn.classList.add('recording');
@@ -187,11 +183,6 @@
             recorder.stop(); isRecording = false;
             btn.innerText = "🎙️ EMPEZAR GRABACIÓN"; btn.classList.remove('recording');
         }
-    }
-
-    function download() {
-        const a = document.createElement('a'); a.href = URL.createObjectURL(finalBlob);
-        a.download = "PRODUCCION_CAPACITIUMX.webm"; a.click();
     }
 
     render();
