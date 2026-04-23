@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX - AUDIO MIXER PRO</title>
+    <title>CAPACITIUMX - AUDIO MIX FIX</title>
     <style>
         :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -32,8 +32,8 @@
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX V329 - AUDIO MIX</div>
-    <div style="color:#666; font-size: 12px;">MEZCLA DE AUDIO: ACTIVADA</div>
+    <div class="logo">CAPACITIUMX V329 - FIXED AUDIO</div>
+    <div id="status-mic" style="color:#666; font-size: 12px;">ESTADO: ESPERANDO CLIC</div>
 </header>
 
 <div class="main">
@@ -54,7 +54,7 @@
 </div>
 
 <div class="footer">
-    <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ GRABAR REACCIÓN CON AUDIO ORIGINAL</button>
+    <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ EMPEZAR GRABACIÓN</button>
     <button id="dlBtn" style="display:none; background:var(--neon); padding:10px 20px; font-weight:bold; cursor:pointer;" onclick="download()">📥 GUARDAR VIDEO FINAL</button>
 </div>
 
@@ -73,8 +73,8 @@
     let camX = 930, camY = 50, camW = 300, camH = 225;
     let dragging = false;
     let recorder, chunks = [], isRecording = false;
+    let audioCtx; // Lo definimos aquí para usarlo después
 
-    // CARGA DE MEDIOS
     function handleFiles(e) {
         Array.from(e.target.files).forEach(file => {
             const url = URL.createObjectURL(file);
@@ -104,8 +104,8 @@
         const m = library[i];
         if (m.type === 'vid') {
             vBg.src = m.url;
-            vBg.muted = false; // IMPORTANTE: No debe estar silenciado
-            vBg.volume = 0.7;  // Volumen del video de fondo al 70% para que tu voz se oiga
+            vBg.muted = false;
+            vBg.volume = 0.6;
             vBg.load();
             vBg.play(); 
         }
@@ -116,10 +116,8 @@
         if (vBg.paused) vBg.play(); else vBg.pause();
     }
 
-    // CÁMARA
     navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s);
 
-    // DIBUJO
     function render() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -139,28 +137,25 @@
         requestAnimationFrame(render);
     }
 
-    // GRABACIÓN CON MEZCLA DE AUDIO (EL CORAZÓN DEL PROBLEMA)
     async function toggleCapture() {
         const btn = document.getElementById('recBtn');
         if (!isRecording) {
-            // 1. Capturar tu voz
+            // ACTIVAR AUDIO CONTEXT AL HACER CLIC (MANDATORIO)
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-            
-            // 2. Capturar video del monitor
             const canvasStream = canvas.captureStream(30);
             
-            // 3. CAPTURAR EL AUDIO DEL VIDEO ORIGINAL
-            const audioCtx = new AudioContext();
+            // CREAR MEZCLA REAL
             const sourceMic = audioCtx.createMediaStreamSource(micStream);
             const sourceVid = audioCtx.createMediaElementSource(vBg);
             const destination = audioCtx.createMediaStreamDestination();
             
-            // Mezclamos ambos sonidos en el destino final
             sourceMic.connect(destination);
             sourceVid.connect(destination);
-            sourceVid.connect(audioCtx.destination); // Esto es para que TÚ lo oigas mientras grabas
+            sourceVid.connect(audioCtx.destination); 
 
-            // 4. Unir todo
             const combined = new MediaStream([
                 ...canvasStream.getVideoTracks(),
                 ...destination.stream.getAudioTracks()
@@ -174,14 +169,16 @@
                 document.getElementById('dlBtn').style.display = "block";
                 document.getElementById('dlBtn').onclick = () => {
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                    a.download = "REACCION_CON_AUDIO_MIX.webm"; a.click();
+                    a.download = "REACCION_FINAL_OK.webm"; a.click();
                 };
             };
             recorder.start(); isRecording = true;
             btn.innerText = "⏹ DETENER Y GUARDAR"; btn.classList.add('recording');
+            document.getElementById('status-mic').innerText = "🔴 GRABANDO VOZ + VIDEO";
         } else {
             recorder.stop(); isRecording = false;
             btn.innerText = "🎙️ EMPEZAR GRABACIÓN"; btn.classList.remove('recording');
+            document.getElementById('status-mic').innerText = "ESTADO: GUARDADO";
         }
     }
 
