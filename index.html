@@ -2,266 +2,218 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX V329 - STUDIO PRO</title>
+    <title>CAPACITIUMX - ULTIMATE REACTION STUDIO</title>
     <style>
-        :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; --panel: #111; }
+        :root { --neon: #00ff00; --dark: #000; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { background: var(--panel); padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
+        header { background: #111; padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
         .logo { color: var(--neon); font-weight: bold; letter-spacing: 2px; }
 
         .main-view { display: flex; flex: 1; overflow: hidden; }
         
-        /* Panel Lateral: Biblioteca */
-        .sidebar { width: 300px; background: var(--panel); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 15px; }
-        .drop-zone { border: 2px dashed var(--neon); padding: 15px; text-align: center; color: var(--neon); cursor: pointer; margin-bottom: 15px; font-size: 12px; }
+        /* Lateral */
+        .sidebar { width: 280px; background: #0a0a0a; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 15px; }
+        .btn-upload { background: var(--neon); color: black; padding: 10px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 5px; margin-bottom: 15px; }
         .media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .media-item { display: flex; align-items: center; gap: 10px; background: #222; padding: 5px; border-radius: 4px; border: 1px solid #444; }
-        .media-item img { width: 60px; aspect-ratio: 16/9; object-fit: cover; }
-        .media-item span { font-size: 10px; flex: 1; overflow: hidden; }
+        .media-item { background: #222; padding: 5px; border-radius: 4px; display: flex; align-items: center; gap: 10px; font-size: 10px; }
+        .media-item img, .media-item video { width: 50px; height: 30px; object-fit: cover; }
 
         /* Monitor */
-        .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px; }
-        #canvas-render { width: 100%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #222; background: #000; box-shadow: 0 0 30px rgba(0,255,0,0.1); }
-        video#webcam { display: none; }
-
-        /* Timeline Mejorada */
-        .timeline-container { height: 200px; background: #0a0a0a; border-top: 2px solid #333; display: flex; flex-direction: column; }
-        .timeline-controls { padding: 10px; display: flex; justify-content: center; gap: 15px; border-bottom: 1px solid #222; }
-        .track-view { flex: 1; position: relative; overflow-x: auto; white-space: nowrap; padding: 20px 50px; display: flex; align-items: center; gap: 2px; }
+        .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; position: relative; }
+        #canvas-render { width: 95%; max-width: 900px; aspect-ratio: 16/9; border: 1px solid #333; cursor: crosshair; }
         
-        /* Clips en Timeline */
-        .clip { 
-            display: inline-block; width: 120px; height: 60px; 
-            border: 2px solid var(--neon); background-size: cover; 
-            background-position: center; position: relative; 
-            cursor: grab; flex-shrink: 0;
-        }
-        .clip:active { cursor: grabbing; opacity: 0.5; }
-        .clip-num { position: absolute; top: 0; left: 0; background: var(--neon); color: black; font-size: 10px; font-weight: bold; padding: 2px 5px; }
+        /* Controles Flotantes sobre el Monitor */
+        .overlay-controls { position: absolute; top: 30px; right: 40px; display: flex; flex-direction: column; gap: 10px; }
+        .cam-mode-btn { background: rgba(0,255,0,0.2); border: 1px solid var(--neon); color: var(--neon); padding: 5px 10px; cursor: pointer; font-size: 10px; }
 
-        .btn { padding: 10px 20px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase; }
-        .btn-rec { background: var(--red); color: white; }
-        .btn-export { background: var(--neon); color: black; }
-        .btn-text { background: #2563eb; color: white; }
-        .recording { animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        /* Timeline */
+        .timeline { height: 180px; background: #000; border-top: 2px solid #333; display: flex; flex-direction: column; }
+        .timeline-header { padding: 8px; display: flex; justify-content: center; gap: 20px; border-bottom: 1px solid #222; }
+        .track { flex: 1; overflow-x: auto; display: flex; align-items: center; padding: 0 50px; gap: 5px; }
+        .clip { min-width: 130px; height: 70px; border: 2px solid var(--neon); position: relative; cursor: grab; background-size: cover; background-position: center; }
+        
+        .btn-rec { background: var(--red); color: white; padding: 10px 25px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        .recording { animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX STUDIO V329</div>
-    <div style="display: flex; gap: 10px;">
-        <button class="btn btn-text" onclick="toggleWebcam()">📷 CAM ON/OFF</button>
-        <button class="btn btn-text" onclick="editSubtitle()">➕ EDITAR TEXTO</button>
-        <button class="btn" style="background:#444; color:white;" onclick="location.reload()">🗑️ LIMPIAR</button>
+    <div class="logo">CAPACITIUMX ULTIMATE</div>
+    <div style="display:flex; gap:15px;">
+        <button class="cam-mode-btn" onclick="toggleCam()">📷 CÁMARA ON/OFF</button>
+        <button class="cam-mode-btn" onclick="setCamFull()">👤 SOLO YO / CUADRITO</button>
+        <button class="cam-mode-btn" onclick="editTxt()">📝 TEXTO</button>
     </div>
 </header>
 
 <div class="main-view">
     <aside class="sidebar">
-        <div class="drop-zone" onclick="document.getElementById('files').click()">
-            📥 SUBIR FOTOS (SE VAN SUMANDO)
-            <input type="file" id="files" multiple accept="image/*" style="display:none;" onchange="addMedia(event)">
-        </div>
+        <div class="btn-upload" onclick="document.getElementById('file-input').click()">📥 SUBIR FOTOS/VIDEOS</div>
+        <input type="file" id="file-input" multiple accept="image/*,video/*" style="display:none;" onchange="handleFiles(event)">
         <div id="media-list" class="media-list"></div>
     </aside>
 
     <main class="monitor-area">
         <canvas id="canvas-render" width="1280" height="720"></canvas>
-        <video id="webcam" autoplay playsinline></video>
-        <div id="status" style="margin-top:10px; color:yellow; font-size:12px;">MODO: ESPERANDO FOTOS...</div>
+        <div id="status" style="position:absolute; bottom:10px; color:#444; font-size:10px;">ARRASTRA TU CARA PARA MOVERLA EN EL VIDEO</div>
     </main>
 </div>
 
-<div class="timeline-container">
-    <div class="timeline-controls">
-        <button id="recBtn" class="btn btn-rec" onclick="startProduction()">🎙️ GRABAR NARRACIÓN + VIDEO</button>
-        <button id="dlBtn" class="btn btn-export" onclick="downloadFinal()" disabled>📥 DESCARGAR VIDEO FINAL</button>
+<div class="timeline">
+    <div class="timeline-header">
+        <button id="recBtn" class="btn-rec" onclick="startCapture()">🎙️ GRABAR REACCIÓN</button>
+        <button id="dlBtn" style="background:var(--neon); border:none; padding:10px 20px; cursor:pointer; font-weight:bold; border-radius:5px;" onclick="download()" disabled>📥 BAJAR MP4</button>
     </div>
-    <div class="track-view" id="timeline-track" ondragover="allowDrop(event)" ondrop="drop(event)">
-        </div>
+    <div class="track" id="main-track" ondragover="event.preventDefault()" ondrop="dropMedia(event)"></div>
 </div>
+
+<video id="hidden-cam" autoplay playsinline style="display:none"></video>
+<video id="hidden-video-player" loop muted style="display:none"></video>
 
 <script>
     const canvas = document.getElementById('canvas-render');
     const ctx = canvas.getContext('2d');
-    const video = document.getElementById('webcam');
-    
-    let mediaFiles = []; // Lista maestra de fotos
-    let subtitle = "CAPACITIUMX";
-    let isWebcamActive = false;
-    let webcamStream = null;
+    const camElement = document.getElementById('hidden-cam');
+    const videoPlayer = document.getElementById('hidden-video-player');
 
-    let recorder;
-    let chunks = [];
-    let isRecording = false;
-    let finalBlob;
-    let startTime;
+    let mediaItems = [];
+    let isCamActive = false;
+    let camFull = false;
+    let camX = 930, camY = 50, camW = 320, camH = 240;
+    let isDraggingCam = false;
+    let subtitle = "REACCIÓN ÉLITE";
+    let recorder, chunks = [], isRecording = false, videoBlob;
 
-    // --- 1. GESTIÓN DE FOTOS (SUMAR Y ALINEAR) ---
-    function addMedia(event) {
-        const files = Array.from(event.target.files);
-        files.forEach(file => {
+    // 1. CARGA DE ARCHIVOS (FOTOS Y VIDEOS)
+    function handleFiles(e) {
+        Array.from(e.target.files).forEach(file => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const id = Date.now() + Math.random();
-                    mediaFiles.push({ id, img, name: file.name });
-                    renderTimeline();
-                };
+            const isVideo = file.type.includes('video');
+            reader.onload = (ev) => {
+                const obj = { name: file.name, type: isVideo ? 'video' : 'img', src: ev.target.result };
+                if(!isVideo) {
+                    const img = new Image(); img.src = ev.target.result;
+                    obj.el = img;
+                }
+                mediaItems.push(obj);
+                updateTimeline();
             };
             reader.readAsDataURL(file);
         });
     }
 
-    function renderTimeline() {
-        const track = document.getElementById('timeline-track');
-        const list = document.getElementById('media-list');
+    function updateTimeline() {
+        const track = document.getElementById('main-track');
         track.innerHTML = "";
-        list.innerHTML = "";
-
-        mediaFiles.forEach((file, index) => {
-            // Clip en Timeline
-            const clip = document.createElement('div');
-            clip.className = "clip";
-            clip.draggable = true;
-            clip.style.backgroundImage = `url(${file.img.src})`;
-            clip.innerHTML = `<div class="clip-num">${index + 1}</div>`;
-            
-            // Eventos para mover orden
-            clip.ondragstart = (e) => e.dataTransfer.setData("text", index);
-            track.appendChild(clip);
-
-            // Item en Lista lateral
-            const item = document.createElement('div');
-            item.className = "media-item";
-            item.innerHTML = `<img src="${file.img.src}"><span>${file.name}</span>`;
-            list.appendChild(item);
+        mediaItems.forEach((m, i) => {
+            const div = document.createElement('div');
+            div.className = "clip";
+            div.draggable = true;
+            div.ondragstart = (e) => e.dataTransfer.setData("idx", i);
+            if(m.type === 'img') div.style.backgroundImage = `url(${m.src})`;
+            else div.innerHTML = `<video src="${m.src}" style="width:100%;height:100%;object-fit:cover"></video>`;
+            track.appendChild(div);
         });
-        drawPreview();
     }
 
-    // --- 2. MOVIMIENTO EN LÍNEA DE TIEMPO ---
-    function allowDrop(e) { e.preventDefault(); }
-    function drop(e) {
-        e.preventDefault();
-        const oldIndex = e.dataTransfer.getData("text");
-        const newIndex = Math.floor((e.clientX - 350) / 122); // Estimación simple de posición
-        const movedItem = mediaFiles.splice(oldIndex, 1)[0];
-        mediaFiles.splice(newIndex, 0, movedItem);
-        renderTimeline();
+    function dropMedia(e) {
+        const idx = e.dataTransfer.getData("idx");
+        const item = mediaItems.splice(idx, 1)[0];
+        mediaItems.push(item); // Lo mueve al final o puedes mejorar la lógica de posición
+        updateTimeline();
     }
 
-    // --- 3. DIBUJO Y CÁMARA ---
-    async function toggleWebcam() {
-        if (!isWebcamActive) {
-            try {
-                webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = webcamStream;
-                isWebcamActive = true;
-            } catch (e) { alert("Cámara bloqueada"); }
-        } else {
-            webcamStream.getTracks().forEach(t => t.stop());
-            isWebcamActive = false;
+    // 2. MOUSE: ARRASTRAR CÁMARA
+    canvas.onmousedown = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        if(mouseX > camX && mouseX < camX + camW && mouseY > camY && mouseY < camY + camH) isDraggingCam = true;
+    };
+    window.onmousemove = (e) => {
+        if(isDraggingCam) {
+            const rect = canvas.getBoundingClientRect();
+            camX = (e.clientX - rect.left) * (canvas.width / rect.width) - camW/2;
+            camY = (e.clientY - rect.top) * (canvas.height / rect.height) - camH/2;
         }
-    }
+    };
+    window.onmouseup = () => isDraggingCam = false;
 
-    function editSubtitle() {
-        const t = prompt("Nuevo texto:", subtitle);
-        if (t) subtitle = t;
-        drawPreview();
+    // 3. FUNCIONES DE CÁMARA
+    async function toggleCam() {
+        if(!isCamActive) {
+            const s = await navigator.mediaDevices.getUserMedia({ video: true });
+            camElement.srcObject = s;
+            isCamActive = true;
+        } else isCamActive = false;
     }
+    function setCamFull() { camFull = !camFull; }
+    function editTxt() { subtitle = prompt("Texto:", subtitle) || ""; }
 
-    function drawPreview() {
-        if (isRecording) return; // Si graba, el loop se encarga
-        drawFrame(0);
-    }
-
-    function drawFrame(currentTime) {
+    // 4. BUCLE DE RENDERIZADO
+    function draw() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Mostrar fotos secuencialmente (4 segundos por foto)
-        if (mediaFiles.length > 0) {
-            const clipDuration = 4000; 
-            const index = Math.floor(currentTime / clipDuration) % mediaFiles.length;
-            const img = mediaFiles[index].img;
-            
-            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-            const x = (canvas.width / 2) - (img.width / 2) * scale;
-            const y = (canvas.height / 2) - (img.height / 2) * scale;
-            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        // Fondo (Media)
+        if(mediaItems.length > 0) {
+            const active = mediaItems[0]; // Simplificado: muestra el primero
+            if(active.type === 'img') ctx.drawImage(active.el, 0, 0, canvas.width, canvas.height);
+            else {
+                if(videoPlayer.src !== active.src) videoPlayer.src = active.src;
+                videoPlayer.play();
+                ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
+            }
         }
 
-        // Webcam (PiP)
-        if (isWebcamActive) {
-            ctx.strokeStyle = "#00ff00";
-            ctx.lineWidth = 5;
-            ctx.strokeRect(930, 50, 300, 225);
-            ctx.drawImage(video, 930, 50, 300, 225);
+        // Cámara
+        if(isCamActive) {
+            if(camFull) ctx.drawImage(camElement, 0, 0, canvas.width, canvas.height);
+            else {
+                ctx.strokeStyle = var(--neon); ctx.lineWidth = 5;
+                ctx.strokeRect(camX, camY, camW, camH);
+                ctx.drawImage(camElement, camX, camY, camW, camH);
+            }
         }
 
         // Texto
-        ctx.fillStyle = "yellow";
-        ctx.font = "bold 60px Impact";
-        ctx.textAlign = "center";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 10;
-        ctx.strokeText(subtitle.toUpperCase(), canvas.width/2, 650);
-        ctx.fillText(subtitle.toUpperCase(), canvas.width/2, 650);
+        ctx.fillStyle = "yellow"; ctx.font = "bold 50px Arial"; ctx.textAlign = "center";
+        ctx.fillText(subtitle.toUpperCase(), canvas.width/2, 680);
+
+        requestAnimationFrame(draw);
     }
 
-    // --- 4. PRODUCCIÓN FINAL ---
-    async function startProduction() {
-        if (mediaFiles.length === 0) return alert("Sube fotos primero.");
+    // 5. GRABACIÓN
+    async function startCapture() {
         const btn = document.getElementById('recBtn');
-        
-        if (!isRecording) {
-            const audioStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: { echoCancellation: true, noiseSuppression: true } 
-            });
-            const videoStream = canvas.captureStream(30);
-            const combined = new MediaStream([...videoStream.getVideoTracks(), ...audioStream.getAudioTracks()]);
-
+        if(!isRecording) {
+            const audio = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+            const stream = canvas.captureStream(30);
+            const combined = new MediaStream([...stream.getVideoTracks(), ...audio.getAudioTracks()]);
             recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9' });
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                finalBlob = new Blob(chunks, { type: 'video/webm' });
+                videoBlob = new Blob(chunks, { type: 'video/webm' });
                 document.getElementById('dlBtn').disabled = false;
             };
-
-            startTime = Date.now();
-            recorder.start();
-            isRecording = true;
-            btn.innerText = "⏹ DETENER Y GUARDAR";
-            btn.classList.add('recording');
-            
-            function loop() {
-                if (!isRecording) return;
-                drawFrame(Date.now() - startTime);
-                requestAnimationFrame(loop);
-            }
-            loop();
+            recorder.start(); isRecording = true;
+            btn.innerText = "STOP"; btn.classList.add('recording');
         } else {
-            recorder.stop();
-            isRecording = false;
-            btn.innerText = "🎙️ NARRAR Y GRABAR TODO";
-            btn.classList.remove('recording');
+            recorder.stop(); isRecording = false;
+            btn.innerText = "🎙️ GRABAR REACCIÓN"; btn.classList.remove('recording');
         }
     }
 
-    function downloadFinal() {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(finalBlob);
-        a.download = `CAPACITIUMX_PROD.webm`;
-        a.click();
+    function download() {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(videoBlob);
+        a.download = "REACCION_CAPACITIUMX.webm"; a.click();
     }
-</script>
 
+    draw();
+</script>
 </body>
 </html>
