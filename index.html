@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX - ULTIMATE CONTROL</title>
+    <title>CAPACITIUMX V329 - CAPCUT EDITION</title>
     <style>
         :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -11,11 +11,14 @@
         .logo { color: var(--neon); font-weight: bold; letter-spacing: 2px; }
 
         .main { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 260px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .btn-load { background: var(--neon); color: black; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; border: none; }
-        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
-        .thumb-nav { padding: 8px; background: #222; border: 1px solid #444; font-size: 11px; cursor: pointer; border-radius: 4px; }
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .btn-load { background: var(--neon); color: black; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; border: none; width: 100%; }
+        
+        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .thumb-nav { padding: 10px; background: #222; border: 1px solid #444; font-size: 11px; cursor: pointer; border-radius: 4px; position: relative; }
         .thumb-nav.active { border-color: var(--neon); background: #111; }
+        .btn-delete { position: absolute; right: 5px; top: 5px; background: var(--red); color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 9px; padding: 2px 5px; }
 
         .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
         #canvas-render { width: 95%; max-width: 900px; aspect-ratio: 16/9; border: 1px solid #333; background: #050505; }
@@ -25,22 +28,30 @@
         .btn-c:hover { background: var(--neon); color: black; }
 
         .footer { height: 150px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-        .btn-rec { background: var(--red); color: white; padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; }
-        .recording { animation: pulse 1s infinite; }
+        .btn-rec { background: var(--red); color: white; padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; text-transform: uppercase; }
+        .recording { animation: pulse 1s infinite; box-shadow: 0 0 20px var(--red); }
         @keyframes pulse { 50% { opacity: 0.5; } }
+        
+        .edit-tools { display: flex; gap: 10px; margin-bottom: 5px; }
+        .input-text { background: #222; color: white; border: 1px solid var(--neon); padding: 8px; border-radius: 4px; width: 250px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX V329 - PRO STUDIO</div>
-    <div id="status-mic" style="color:yellow; font-size: 12px;">MODO: LISTO</div>
+    <div class="logo">CAPACITIUMX - CAPCUT EDITOR</div>
+    <div id="status-mic" style="color:yellow; font-size: 12px;">ESTADO: LISTO</div>
 </header>
 
 <div class="main">
     <aside class="sidebar">
         <button class="btn-load" onclick="document.getElementById('file-in').click()">📥 SUBIR VIDEO/FOTOS</button>
         <input type="file" id="file-in" multiple accept="image/*,video/*" style="display:none;" onchange="handleFiles(event)">
+        
+        <div class="edit-tools">
+            <input type="text" id="slide-text" class="input-text" placeholder="Texto para esta imagen..." oninput="updateCurrentText()">
+        </div>
+
         <div id="media-list"></div>
     </aside>
 
@@ -58,7 +69,7 @@
 
 <div class="footer">
     <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ EMPEZAR GRABACIÓN</button>
-    <button id="dlBtn" style="display:none; background:var(--neon); padding:10px 20px; font-weight:bold; cursor:pointer;" onclick="download()">📥 GUARDAR VIDEO FINAL</button>
+    <button id="dlBtn" style="display:none; background:var(--neon); padding:10px 20px; font-weight:bold; cursor:pointer; color:black; border:none; border-radius:5px;" onclick="download()">📥 GUARDAR VIDEO FINAL</button>
 </div>
 
 <video id="v-cam" autoplay playsinline style="display:none"></video>
@@ -69,10 +80,11 @@
     const ctx = canvas.getContext('2d');
     const vCam = document.getElementById('v-cam');
     const vBg = document.getElementById('v-bg');
+    const slideTextInput = document.getElementById('slide-text');
 
     let library = [];
     let curIdx = -1;
-    let camMode = 'mini'; // 'mini', 'full', 'off'
+    let camMode = 'mini'; 
     let camX = 930, camY = 50, camW = 300, camH = 225;
     let dragging = false;
     let recorder, chunks = [], isRecording = false;
@@ -82,7 +94,7 @@
         Array.from(e.target.files).forEach(file => {
             const url = URL.createObjectURL(file);
             const isVid = file.type.includes('video');
-            const item = { type: isVid ? 'vid' : 'img', url: url, el: null };
+            const item = { type: isVid ? 'vid' : 'img', url: url, el: null, text: "" };
             if (!isVid) { const img = new Image(); img.src = url; item.el = img; }
             library.push(item);
             updateList();
@@ -97,22 +109,42 @@
             const d = document.createElement('div');
             d.className = `thumb-nav ${i === curIdx ? 'active' : ''}`;
             d.innerText = `${i+1}. ${m.type === 'vid' ? '🎥 VIDEO' : '🖼️ FOTO'}`;
+            
+            // Botón de CORTAR / ELIMINAR
+            const del = document.createElement('button');
+            del.className = "btn-delete";
+            del.innerText = "✂ CORTAR";
+            del.onclick = (e) => {
+                e.stopPropagation();
+                library.splice(i, 1);
+                if(curIdx === i) curIdx = -1;
+                updateList();
+            };
+            
             d.onclick = () => selectMedia(i);
+            d.appendChild(del);
             list.appendChild(d);
         });
     }
 
     function selectMedia(i) {
+        if(i < 0 || i >= library.length) return;
         curIdx = i;
         const m = library[i];
+        slideTextInput.value = m.text || ""; // Cargar texto del clip
         if (m.type === 'vid') {
             vBg.src = m.url;
             vBg.muted = false;
             vBg.volume = 0.6;
-            vBg.load();
             vBg.play(); 
         }
         updateList();
+    }
+
+    function updateCurrentText() {
+        if(curIdx !== -1) {
+            library[curIdx].text = slideTextInput.value;
+        }
     }
 
     function togglePlay() {
@@ -121,19 +153,31 @@
 
     navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s);
 
-    // DIBUJO CONTINUO
     function render() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // 1. DIBUJAR FONDO
         if (curIdx !== -1) {
             const m = library[curIdx];
-            if (m.type === 'img' && m.el) ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
-            else if (m.type === 'vid') ctx.drawImage(vBg, 0, 0, canvas.width, canvas.height);
+            // Dibujar Media
+            if (m.type === 'img' && m.el) {
+                ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
+            } else if (m.type === 'vid') {
+                ctx.drawImage(vBg, 0, 0, canvas.width, canvas.height);
+            }
+
+            // DIBUJAR TEXTO ESPECÍFICO DEL CLIP
+            if(m.text) {
+                ctx.fillStyle = "yellow";
+                ctx.font = "bold 60px Impact";
+                ctx.textAlign = "center";
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 8;
+                ctx.strokeText(m.text.toUpperCase(), canvas.width/2, 650);
+                ctx.fillText(m.text.toUpperCase(), canvas.width/2, 650);
+            }
         }
 
-        // 2. DIBUJAR CÁMARA (Si no está en modo 'off')
         if (camMode !== 'off' && vCam.srcObject) {
             if (camMode === 'full') {
                 ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
@@ -162,7 +206,6 @@
     };
     window.onmouseup = () => dragging = false;
 
-    // GRABACIÓN FINAL
     async function toggleCapture() {
         const btn = document.getElementById('recBtn');
         if (!isRecording) {
@@ -176,18 +219,13 @@
             const destination = audioCtx.createMediaStreamDestination();
             sourceMic.connect(destination);
 
-            // Solo mezclar audio del video si hay un video cargado
             if (curIdx !== -1 && library[curIdx].type === 'vid') {
                 const sourceVid = audioCtx.createMediaElementSource(vBg);
                 sourceVid.connect(destination);
                 sourceVid.connect(audioCtx.destination);
             }
 
-            const combined = new MediaStream([
-                ...canvasStream.getVideoTracks(),
-                ...destination.stream.getAudioTracks()
-            ]);
-            
+            const combined = new MediaStream([...canvasStream.getVideoTracks(), ...destination.stream.getAudioTracks()]);
             recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9' });
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
@@ -196,7 +234,7 @@
                 document.getElementById('dlBtn').style.display = "block";
                 document.getElementById('dlBtn').onclick = () => {
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                    a.download = "PRODUCCION_FINAL.webm"; a.click();
+                    a.download = "EDIT_CAPACITIUMX.webm"; a.click();
                 };
             };
             recorder.start(); isRecording = true;
