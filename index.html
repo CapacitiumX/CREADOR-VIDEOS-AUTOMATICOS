@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX - AUDIO MIX FIX</title>
+    <title>CAPACITIUMX - ULTIMATE CONTROL</title>
     <style>
         :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -21,7 +21,8 @@
         #canvas-render { width: 95%; max-width: 900px; aspect-ratio: 16/9; border: 1px solid #333; background: #050505; }
         
         .console { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .btn-c { background: rgba(0,0,0,0.8); border: 1px solid var(--neon); color: var(--neon); padding: 8px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .btn-c { background: rgba(0,0,0,0.85); border: 1px solid var(--neon); color: var(--neon); padding: 8px; cursor: pointer; font-size: 10px; font-weight: bold; border-radius: 4px; }
+        .btn-c:hover { background: var(--neon); color: black; }
 
         .footer { height: 150px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
         .btn-rec { background: var(--red); color: white; padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; }
@@ -32,8 +33,8 @@
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX V329 - FIXED AUDIO</div>
-    <div id="status-mic" style="color:#666; font-size: 12px;">ESTADO: ESPERANDO CLIC</div>
+    <div class="logo">CAPACITIUMX V329 - PRO STUDIO</div>
+    <div id="status-mic" style="color:yellow; font-size: 12px;">MODO: LISTO</div>
 </header>
 
 <div class="main">
@@ -47,6 +48,8 @@
         <div class="console">
             <button class="btn-c" onclick="camMode='full'">👤 YO GRANDE</button>
             <button class="btn-c" onclick="camMode='mini'">🖼️ YO CHICO</button>
+            <button class="btn-c" onclick="camMode='off'" style="background: #400; color: white;">🚫 OCULTARME</button>
+            <hr style="border: 0.5px solid #333;">
             <button class="btn-c" id="playBtn" onclick="togglePlay()">▶ PLAY / PAUSA FONDO</button>
         </div>
         <canvas id="canvas-render" width="1280" height="720"></canvas>
@@ -69,11 +72,11 @@
 
     let library = [];
     let curIdx = -1;
-    let camMode = 'mini'; 
+    let camMode = 'mini'; // 'mini', 'full', 'off'
     let camX = 930, camY = 50, camW = 300, camH = 225;
     let dragging = false;
     let recorder, chunks = [], isRecording = false;
-    let audioCtx; // Lo definimos aquí para usarlo después
+    let audioCtx;
 
     function handleFiles(e) {
         Array.from(e.target.files).forEach(file => {
@@ -118,17 +121,23 @@
 
     navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s);
 
+    // DIBUJO CONTINUO
     function render() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. DIBUJAR FONDO
         if (curIdx !== -1) {
             const m = library[curIdx];
             if (m.type === 'img' && m.el) ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
             else if (m.type === 'vid') ctx.drawImage(vBg, 0, 0, canvas.width, canvas.height);
         }
-        if (vCam.srcObject) {
-            if (camMode === 'full') ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
-            else {
+
+        // 2. DIBUJAR CÁMARA (Si no está en modo 'off')
+        if (camMode !== 'off' && vCam.srcObject) {
+            if (camMode === 'full') {
+                ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
+            } else {
                 ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 4;
                 ctx.strokeRect(camX, camY, camW, camH);
                 ctx.drawImage(vCam, camX, camY, camW, camH);
@@ -137,24 +146,42 @@
         requestAnimationFrame(render);
     }
 
+    // ARRASTRAR CÁMARA
+    canvas.onmousedown = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * (canvas.width / r.width);
+        const y = (e.clientY - r.top) * (canvas.height / r.height);
+        if(camMode === 'mini' && x > camX && x < camX + camW && y > camY && y < camY + camH) dragging = true;
+    };
+    window.onmousemove = (e) => {
+        if(dragging) {
+            const r = canvas.getBoundingClientRect();
+            camX = (e.clientX - r.left) * (canvas.width / r.width) - camW/2;
+            camY = (e.clientY - r.top) * (canvas.height / r.height) - camH/2;
+        }
+    };
+    window.onmouseup = () => dragging = false;
+
+    // GRABACIÓN FINAL
     async function toggleCapture() {
         const btn = document.getElementById('recBtn');
         if (!isRecording) {
-            // ACTIVAR AUDIO CONTEXT AL HACER CLIC (MANDATORIO)
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') await audioCtx.resume();
 
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
             const canvasStream = canvas.captureStream(30);
             
-            // CREAR MEZCLA REAL
             const sourceMic = audioCtx.createMediaStreamSource(micStream);
-            const sourceVid = audioCtx.createMediaElementSource(vBg);
             const destination = audioCtx.createMediaStreamDestination();
-            
             sourceMic.connect(destination);
-            sourceVid.connect(destination);
-            sourceVid.connect(audioCtx.destination); 
+
+            // Solo mezclar audio del video si hay un video cargado
+            if (curIdx !== -1 && library[curIdx].type === 'vid') {
+                const sourceVid = audioCtx.createMediaElementSource(vBg);
+                sourceVid.connect(destination);
+                sourceVid.connect(audioCtx.destination);
+            }
 
             const combined = new MediaStream([
                 ...canvasStream.getVideoTracks(),
@@ -169,16 +196,14 @@
                 document.getElementById('dlBtn').style.display = "block";
                 document.getElementById('dlBtn').onclick = () => {
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                    a.download = "REACCION_FINAL_OK.webm"; a.click();
+                    a.download = "PRODUCCION_FINAL.webm"; a.click();
                 };
             };
             recorder.start(); isRecording = true;
-            btn.innerText = "⏹ DETENER Y GUARDAR"; btn.classList.add('recording');
-            document.getElementById('status-mic').innerText = "🔴 GRABANDO VOZ + VIDEO";
+            btn.innerText = "⏹ FINALIZAR"; btn.classList.add('recording');
         } else {
             recorder.stop(); isRecording = false;
             btn.innerText = "🎙️ EMPEZAR GRABACIÓN"; btn.classList.remove('recording');
-            document.getElementById('status-mic').innerText = "ESTADO: GUARDADO";
         }
     }
 
