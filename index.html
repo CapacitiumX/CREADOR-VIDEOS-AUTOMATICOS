@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX ULTIMATE - FIX FINAL</title>
+    <title>CAPACITIUMX - TIMELINE EDITOR</title>
     <style>
-        :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
+        :root { --neon: #00ff00; --dark: #0a0a0a; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         header { background: #111; padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
@@ -12,59 +12,63 @@
 
         .main-engine { display: flex; flex: 1; overflow: hidden; }
         
-        /* Panel Lateral */
-        .sidebar { width: 280px; background: #0a0a0a; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
-        .btn-upload { background: var(--neon); color: black; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        /* Biblioteca de Medios */
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-upload { background: var(--neon); color: black; padding: 10px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; }
         #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .thumb-item { background: #222; padding: 5px; border-radius: 4px; font-size: 10px; cursor: pointer; border: 1px solid transparent; }
-        .thumb-item:hover { border-color: var(--neon); }
+        .thumb-card { background: #1a1a1a; border: 1px solid #333; padding: 5px; border-radius: 4px; cursor: pointer; position: relative; }
+        .thumb-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .thumb-card.active { border-color: var(--neon); box-shadow: 0 0 10px var(--neon); }
+        .text-indicator { font-size: 9px; color: yellow; margin-top: 3px; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         /* Monitor */
         .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
-        #canvas-render { width: 95%; max-width: 900px; aspect-ratio: 16/9; border: 1px solid #333; background: #000; cursor: move; }
+        #canvas-render { width: 90%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #222; background: #000; }
         
-        /* Timeline */
-        .timeline { height: 150px; background: #0a0a0a; border-top: 2px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        /* Controles Inferiores */
+        .timeline-footer { height: 160px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
         .btn-action { padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; text-transform: uppercase; }
         .btn-rec { background: var(--red); color: white; }
         .btn-export { background: var(--neon); color: black; }
-        .recording { animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        .recording { animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+        #status-bar { color: #888; font-size: 11px; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX STUDIO V329</div>
+    <div class="logo">CAPACITIUMX V329 - STUDIO</div>
     <div style="display:flex; gap:10px;">
-        <button class="btn-upload" style="padding:5px 10px;" onclick="toggleCam()">📷 CÁMARA</button>
-        <button class="btn-upload" style="padding:5px 10px;" onclick="setCamFull()">👤 PANTALLA COMPLETA</button>
-        <button class="btn-upload" style="padding:5px 10px;" onclick="addText()">📝 TEXTO</button>
+        <button class="btn-upload" style="background:#222; color:white; border:1px solid #444;" onclick="toggleCam()">📷 CÁMARA</button>
+        <button class="btn-upload" style="background:#2563eb; color:white;" onclick="assignTextToImage()">📝 PONER TEXTO A ESTA FOTO</button>
+        <button class="btn-upload" style="background:#400; color:white;" onclick="location.reload()">🗑️ LIMPIAR TODO</button>
     </div>
 </header>
 
 <div class="main-engine">
     <aside class="sidebar">
-        <div class="btn-upload" onclick="document.getElementById('file-in').click()">📥 SUBIR ARCHIVOS</div>
+        <div class="btn-upload" onclick="document.getElementById('file-in').click()">📥 SUBIR FOTOS / VIDEOS</div>
         <input type="file" id="file-in" multiple accept="image/*,video/*" style="display:none;" onchange="handleFiles(event)">
         <div id="media-list"></div>
     </aside>
 
     <main class="monitor-area">
         <canvas id="canvas-render" width="1280" height="720"></canvas>
-        <div id="status" style="font-size:12px; color:#666; margin-top:10px;">ARRASTRA LA CÁMARA PARA REUBICARLA</div>
+        <div id="status-bar">SISTEMA LISTO. ASIGNA TEXTOS Y GRABA.</div>
     </main>
 </div>
 
-<div class="timeline">
+<div class="timeline-footer">
     <div style="display: flex; gap: 20px;">
-        <button id="recBtn" class="btn-action btn-rec" onclick="toggleCapture()">🎙️ EMPEZAR GRABACIÓN</button>
-        <button id="dlBtn" class="btn-action btn-export" onclick="downloadVideo()" disabled>📥 DESCARGAR VIDEO</button>
+        <button id="recBtn" class="btn-action btn-rec" onclick="startProduction()">🎙️ INICIAR NARRACIÓN AUTOMÁTICA</button>
+        <button id="dlBtn" class="btn-action btn-export" onclick="downloadVideo()" disabled>📥 DESCARGAR MP4</button>
     </div>
+    <div style="color:var(--neon); font-size:10px; font-weight:bold;">TIEMPO POR FOTO: 3 SEGUNDOS</div>
 </div>
 
 <video id="v-cam" autoplay playsinline style="display:none"></video>
-<video id="v-player" loop muted style="display:none"></video>
+<video id="v-player" muted style="display:none"></video>
 
 <script>
     const canvas = document.getElementById('canvas-render');
@@ -73,21 +77,27 @@
     const vPlayer = document.getElementById('v-player');
 
     let mediaLibrary = [];
-    let activeMedia = null;
+    let currentIndex = 0;
     let isCamOn = false;
-    let camFull = false;
-    let camX = 900, camY = 50, camW = 320, camH = 240;
+    let camX = 930, camY = 40, camW = 300, camH = 225;
     let dragging = false;
-    let overlayText = "";
     
     let recorder, chunks = [], isRecording = false, finalBlob;
+    let productionStartTime = 0;
 
-    // 1. CARGAR FOTOS/VIDEOS
+    // 1. CARGAR ARCHIVOS Y GESTIONAR TEXTOS INDIVIDUALES
     function handleFiles(e) {
         Array.from(e.target.files).forEach(file => {
             const url = URL.createObjectURL(file);
             const isVideo = file.type.includes('video');
-            const item = { name: file.name, type: isVideo ? 'video' : 'img', url: url };
+            const item = { 
+                id: Date.now() + Math.random(),
+                name: file.name, 
+                type: isVideo ? 'video' : 'img', 
+                url: url,
+                text: "", // Texto único por imagen
+                el: null 
+            };
             
             if (!isVideo) {
                 const img = new Image(); img.src = url;
@@ -95,27 +105,42 @@
             }
             
             mediaLibrary.push(item);
-            activeMedia = item; // Activar el último subido
-            
-            const div = document.createElement('div');
-            div.className = "thumb-item";
-            div.innerText = (isVideo ? "🎥 " : "🖼️ ") + file.name;
-            div.onclick = () => { activeMedia = item; if(isVideo) { vPlayer.src = url; vPlayer.play(); } };
-            document.getElementById('media-list').appendChild(div);
+            refreshGallery();
         });
     }
 
-    // 2. CONTROL DE CÁMARA
+    function refreshGallery() {
+        const list = document.getElementById('media-list');
+        list.innerHTML = "";
+        mediaLibrary.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = `thumb-card ${index === currentIndex ? 'active' : ''}`;
+            div.innerHTML = `
+                <img src="${item.type === 'img' ? item.url : ''}" style="background:#333">
+                <span class="text-indicator">${item.text ? '💬 ' + item.text : '(Sin texto)'}</span>
+            `;
+            div.onclick = () => { currentIndex = index; if(item.type==='video'){vPlayer.src=item.url;vPlayer.play();} };
+            list.appendChild(div);
+        });
+    }
+
+    function assignTextToImage() {
+        if (mediaLibrary.length === 0) return alert("Sube fotos primero.");
+        const t = prompt("Texto para esta imagen específica:", mediaLibrary[currentIndex].text);
+        if (t !== null) {
+            mediaLibrary[currentIndex].text = t;
+            refreshGallery();
+        }
+    }
+
+    // 2. CÁMARA ARRASTRABLE
     async function toggleCam() {
         if (!isCamOn) {
             const s = await navigator.mediaDevices.getUserMedia({ video: true });
             vCam.srcObject = s; isCamOn = true;
         } else { isCamOn = false; }
     }
-    function setCamFull() { camFull = !camFull; }
-    function addText() { overlayText = prompt("Escribe el texto:") || ""; }
 
-    // 3. ARRASTRAR CÁMARA (LÓGICA CORREGIDA)
     canvas.onmousedown = (e) => {
         const r = canvas.getBoundingClientRect();
         const x = (e.clientX - r.left) * (canvas.width / r.width);
@@ -131,48 +156,55 @@
     };
     window.onmouseup = () => dragging = false;
 
-    // 4. BUCLE DE DIBUJO (EL CORAZÓN DEL PROGRAMA)
+    // 3. MOTOR DE RENDERIZADO (DIBUJO)
     function draw() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Dibujar Fondo
-        if (activeMedia) {
-            if (activeMedia.type === 'img' && activeMedia.el) {
-                ctx.drawImage(activeMedia.el, 0, 0, canvas.width, canvas.height);
-            } else if (activeMedia.type === 'video') {
-                if (vPlayer.src !== activeMedia.url) vPlayer.src = activeMedia.url;
+        let timeOffset = 0;
+        if (isRecording) {
+            timeOffset = (Date.now() - productionStartTime) / 1000;
+            // Cambiar índice cada 3 segundos automáticamente
+            currentIndex = Math.floor(timeOffset / 3) % mediaLibrary.length;
+        }
+
+        const active = mediaLibrary[currentIndex];
+
+        // Dibujar Fondo (Imagen o Video)
+        if (active) {
+            if (active.type === 'img' && active.el) {
+                ctx.drawImage(active.el, 0, 0, canvas.width, canvas.height);
+            } else if (active.type === 'video') {
+                if (vPlayer.src !== active.url) { vPlayer.src = active.url; vPlayer.play(); }
                 ctx.drawImage(vPlayer, 0, 0, canvas.width, canvas.height);
+            }
+
+            // Dibujar su TEXTO ÚNICO
+            if (active.text) {
+                ctx.fillStyle = "yellow"; ctx.font = "bold 60px Impact"; ctx.textAlign = "center";
+                ctx.strokeStyle = "black"; ctx.lineWidth = 8;
+                ctx.strokeText(active.text.toUpperCase(), canvas.width/2, 650);
+                ctx.fillText(active.text.toUpperCase(), canvas.width/2, 650);
             }
         }
 
         // Dibujar Cámara
         if (isCamOn) {
-            if (camFull) {
-                ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
-            } else {
-                ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 4;
-                ctx.strokeRect(camX, camY, camW, camH);
-                ctx.drawImage(vCam, camX, camY, camW, camH);
-            }
-        }
-
-        // Dibujar Texto
-        if (overlayText) {
-            ctx.fillStyle = "yellow"; ctx.font = "bold 60px Impact"; ctx.textAlign = "center";
-            ctx.strokeStyle = "black"; ctx.lineWidth = 8;
-            ctx.strokeText(overlayText.toUpperCase(), canvas.width/2, 650);
-            ctx.fillText(overlayText.toUpperCase(), canvas.width/2, 650);
+            ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 4;
+            ctx.strokeRect(camX, camY, camW, camH);
+            ctx.drawImage(vCam, camX, camY, camW, camH);
         }
 
         requestAnimationFrame(draw);
     }
 
-    // 5. GRABACIÓN SEGURA
-    async function toggleCapture() {
+    // 4. GRABACIÓN Y DESCARGA
+    async function startProduction() {
+        if (mediaLibrary.length === 0) return alert("Sube fotos primero.");
         const btn = document.getElementById('recBtn');
+        
         if (!isRecording) {
-            const audio = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const audio = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
             const videoStream = canvas.captureStream(30);
             const combined = new MediaStream([...videoStream.getVideoTracks(), ...audio.getAudioTracks()]);
             
@@ -182,24 +214,30 @@
             recorder.onstop = () => {
                 finalBlob = new Blob(chunks, { type: 'video/webm' });
                 document.getElementById('dlBtn').disabled = false;
+                document.getElementById('status-bar').innerText = "VIDEO GENERADO. LISTO PARA DESCARGAR.";
             };
             
-            recorder.start(); isRecording = true;
-            btn.innerText = "⏹ DETENER GRABACIÓN"; btn.classList.add('recording');
+            productionStartTime = Date.now();
+            recorder.start(); 
+            isRecording = true;
+            btn.innerText = "⏹ DETENER Y GUARDAR"; 
+            btn.classList.add('recording');
         } else {
-            recorder.stop(); isRecording = false;
-            btn.innerText = "🎙️ EMPEZAR GRABACIÓN"; btn.classList.remove('recording');
+            recorder.stop(); 
+            isRecording = false;
+            btn.innerText = "🎙️ INICIAR NARRACIÓN AUTOMÁTICA"; 
+            btn.classList.remove('recording');
         }
     }
 
     function downloadVideo() {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(finalBlob);
-        a.download = `CAPACITIUMX_REACTION.webm`;
+        a.download = `CAPACITIUMX_PRODUCTION.webm`;
         a.click();
     }
 
-    draw(); // Iniciar motor visual
+    draw();
 </script>
 </body>
 </html>
