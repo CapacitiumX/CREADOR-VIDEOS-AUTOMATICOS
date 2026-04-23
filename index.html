@@ -2,49 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX V329 - PRO EDITOR (TRIM & CUT)</title>
+    <title>CAPACITIUMX V329 - STUDIO CINE</title>
     <style>
-        :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; --blue: #2563eb; }
+        :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         header { background: #111; padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
         .logo { color: var(--neon); font-weight: bold; letter-spacing: 2px; }
 
         .main { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 320px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-load { background: var(--neon); color: black; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; border: none; }
         
-        .btn-load { background: var(--neon); color: black; padding: 10px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; border: none; width: 100%; }
-        
-        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
         .thumb-nav { padding: 8px; background: #222; border: 1px solid #444; font-size: 11px; cursor: pointer; border-radius: 4px; position: relative; }
-        .thumb-nav.active { border-color: var(--neon); background: #111; }
+        .thumb-nav.active { border-color: var(--neon); background: #111; box-shadow: 0 0 10px var(--neon); }
 
         .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
-        #canvas-render { width: 95%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #333; background: #050505; }
+        #canvas-render { width: 95%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #333; background: #050505; cursor: move; }
         
         .console { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; }
         .btn-c { background: rgba(0,0,0,0.85); border: 1px solid var(--neon); color: var(--neon); padding: 8px; cursor: pointer; font-size: 10px; font-weight: bold; border-radius: 4px; }
 
-        /* LÍNEA DE TIEMPO DE GRABACIONES (SEGMENTOS) */
-        .timeline-footer { height: 200px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; padding: 10px; gap: 10px; }
-        .recordings-track { flex: 1; background: #000; border: 1px solid #222; display: flex; align-items: center; gap: 5px; padding: 5px; overflow-x: auto; }
-        
-        .segment { min-width: 100px; height: 60px; background: var(--blue); border: 1px solid white; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 10px; }
-        .btn-del-seg { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border: none; border-radius: 50%; cursor: pointer; width: 18px; height: 18px; font-size: 10px; font-weight: bold; }
-
-        .controls-row { display: flex; justify-content: center; gap: 15px; align-items: center; }
-        .btn-rec { background: var(--red); color: white; padding: 12px 24px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; }
-        .recording { animation: pulse 1s infinite; box-shadow: 0 0 15px var(--red); }
+        .footer { height: 160px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .btn-rec { background: var(--red); color: white; padding: 15px 40px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; font-size: 16px; }
+        .recording { animation: pulse 1s infinite; box-shadow: 0 0 30px var(--red); }
         @keyframes pulse { 50% { opacity: 0.5; } }
         
-        .input-text { background: #222; color: white; border: 1px solid var(--neon); padding: 8px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        .input-text { background: #222; color: white; border: 1px solid var(--neon); padding: 10px; border-radius: 4px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX - PRO VIDEO EDITOR</div>
-    <div id="status-mic" style="color:yellow; font-size: 12px;">EDITOR MULTI-SEGMENTO ACTIVO</div>
+    <div class="logo">CAPACITIUMX - STUDIO CINE V329</div>
+    <div id="status-mic" style="color:yellow; font-size: 12px;">MODO: GRABACIÓN CONTINUA (ESTILO CAPCUT)</div>
 </header>
 
 <div class="main">
@@ -52,7 +44,7 @@
         <button class="btn-load" onclick="document.getElementById('file-in').click()">📥 SUBIR FOTOS/VIDEOS</button>
         <input type="file" id="file-in" multiple accept="image/*,video/*" style="display:none;" onchange="handleFiles(event)">
         <hr style="border: 0.5px solid #333; width: 100%;">
-        <input type="text" id="slide-text" class="input-text" placeholder="Texto para este clip..." oninput="updateCurrentText()">
+        <input type="text" id="slide-text" class="input-text" placeholder="Escribe el texto aquí..." oninput="updateCurrentText()">
         <div id="media-list"></div>
     </aside>
 
@@ -61,21 +53,18 @@
             <button class="btn-c" onclick="camMode='full'">👤 YO GRANDE</button>
             <button class="btn-c" onclick="camMode='mini'">🖼️ YO CHICO</button>
             <button class="btn-c" onclick="camMode='off'">🚫 OCULTARME</button>
-            <button class="btn-c" id="playBtn" onclick="togglePlay()">▶ PLAY FONDO</button>
+            <button class="btn-c" id="playBtn" onclick="togglePlay()">▶ PLAY / PAUSA FONDO</button>
         </div>
         <canvas id="canvas-render" width="1280" height="720"></canvas>
     </main>
 </div>
 
-<div class="timeline-footer">
-    <div class="controls-row">
-        <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ GRABAR SEGMENTO</button>
-        <button id="dlBtn" style="display:none; background:var(--neon); padding:12px 24px; font-weight:bold; cursor:pointer; border:none; border-radius:8px;" onclick="downloadAll()">🎬 UNIR Y DESCARGAR TODO</button>
+<div class="footer">
+    <div style="display:flex; gap:20px;">
+        <button id="recBtn" class="btn-rec" onclick="toggleCapture()">🎙️ EMPEZAR PRODUCCIÓN FINAL</button>
+        <button id="dlBtn" style="display:none; background:var(--neon); color:black; padding:15px 30px; font-weight:bold; cursor:pointer; border:none; border-radius:8px;" onclick="download()">📥 GUARDAR VIDEO MP4</button>
     </div>
-    
-    <div style="font-size: 10px; color: #888; text-align: center;">TUS GRABACIONES (CORTA LAS QUE NO TE GUSTEN):</div>
-    <div class="recordings-track" id="recordings-track">
-        </div>
+    <div style="color:#666; font-size:10px;">MIENTRAS GRABAS, PUEDES CAMBIAR FOTOS Y TEXTOS; TODO SE GUARDARÁ EN EL VIDEO</div>
 </div>
 
 <video id="v-cam" autoplay playsinline style="display:none"></video>
@@ -89,8 +78,7 @@
     const slideTextInput = document.getElementById('slide-text');
 
     let library = [], curIdx = -1, camMode = 'mini', camX = 930, camY = 50, camW = 300, camH = 225, dragging = false;
-    let recorder, chunks = [], isRecording = false, audioCtx;
-    let segments = []; // AQUÍ SE GUARDAN LOS VIDEOS CORTADOS
+    let recorder, chunks = [], isRecording = false, audioCtx, finalBlob;
 
     function handleFiles(e) {
         Array.from(e.target.files).forEach(file => {
@@ -110,7 +98,7 @@
         library.forEach((m, i) => {
             const d = document.createElement('div');
             d.className = `thumb-nav ${i === curIdx ? 'active' : ''}`;
-            d.innerText = `${i+1}. ${m.type === 'vid' ? '🎥' : '🖼️'} ${m.text.substring(0,15)}...`;
+            d.innerText = `${i+1}. ${m.type === 'vid' ? '🎥 VIDEO' : '🖼️ FOTO'}`;
             d.onclick = () => selectMedia(i);
             list.appendChild(d);
         });
@@ -119,23 +107,28 @@
     function selectMedia(i) {
         curIdx = i;
         slideTextInput.value = library[i].text || "";
-        if (library[i].type === 'vid') { vBg.src = library[i].url; vBg.play(); }
+        if (library[i].type === 'vid') {
+            vBg.src = library[i].url;
+            vBg.play();
+        }
         updateList();
     }
 
     function updateCurrentText() { if(curIdx !== -1) library[curIdx].text = slideTextInput.value; }
-
     function togglePlay() { if (vBg.paused) vBg.play(); else vBg.pause(); }
 
     navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s);
 
+    // DIBUJO CONSTANTE DEL MONITOR (Lo que ves es lo que se captura)
     function render() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
         if (curIdx !== -1) {
             const m = library[curIdx];
             if (m.type === 'img' && m.el) ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
             else if (m.type === 'vid') ctx.drawImage(vBg, 0, 0, canvas.width, canvas.height);
+            
             if(m.text) {
                 ctx.fillStyle = "yellow"; ctx.font = "bold 60px Impact"; ctx.textAlign = "center";
                 ctx.strokeStyle = "black"; ctx.lineWidth = 8;
@@ -143,6 +136,7 @@
                 ctx.fillText(m.text.toUpperCase(), canvas.width/2, 650);
             }
         }
+
         if (camMode !== 'off' && vCam.srcObject) {
             if (camMode === 'full') ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
             else {
@@ -160,62 +154,45 @@
             if (!audioCtx) audioCtx = new AudioContext();
             if (audioCtx.state === 'suspended') await audioCtx.resume();
 
-            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
             const canvasStream = canvas.captureStream(30);
             const destination = audioCtx.createMediaStreamDestination();
+            
+            // Mezclamos tu voz
             audioCtx.createMediaStreamSource(micStream).connect(destination);
 
+            // Mezclamos el audio del video si está sonando
             if (curIdx !== -1 && library[curIdx].type === 'vid') {
-                const sourceVid = audioCtx.createMediaElementSource(vBg);
-                sourceVid.connect(destination);
-                sourceVid.connect(audioCtx.destination);
+                const vidSource = audioCtx.createMediaElementSource(vBg);
+                vidSource.connect(destination);
+                vidSource.connect(audioCtx.destination);
             }
 
             const combined = new MediaStream([...canvasStream.getVideoTracks(), ...destination.stream.getAudioTracks()]);
-            recorder = new MediaRecorder(combined, { mimeType: 'video/webm' });
+            
+            // Grabamos una sola pista continua para evitar el error de "pantalla negra"
+            recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9' });
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                segments.push(blob);
-                updateSegmentsTimeline();
+                finalBlob = new Blob(chunks, { type: 'video/webm' });
+                document.getElementById('dlBtn').style.display = "block";
             };
+            
             recorder.start(); isRecording = true;
-            btn.innerText = "⏹ PARAR (CORTAR AQUÍ)"; btn.classList.add('recording');
+            btn.innerText = "⏹ TERMINAR GRABACIÓN"; btn.classList.add('recording');
         } else {
             recorder.stop(); isRecording = false;
-            btn.innerText = "🎙️ GRABAR SIGUIENTE PARTE"; btn.classList.remove('recording');
+            btn.innerText = "🎙️ EMPEZAR PRODUCCIÓN FINAL"; btn.classList.remove('recording');
         }
     }
 
-    function updateSegmentsTimeline() {
-        const track = document.getElementById('recordings-track');
-        track.innerHTML = "";
-        segments.forEach((seg, i) => {
-            const div = document.createElement('div');
-            div.className = "segment";
-            div.innerHTML = `Clip ${i+1}<button class="btn-del-seg" onclick="deleteSegment(${i})">X</button>`;
-            track.appendChild(div);
-        });
-        document.getElementById('dlBtn').style.display = segments.length > 0 ? "block" : "none";
+    function download() {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(finalBlob);
+        a.download = `CAPACITIUMX_ULTIMATE_${Date.now()}.webm`; a.click();
     }
 
-    function deleteSegment(i) {
-        segments.splice(i, 1);
-        updateSegmentsTimeline();
-    }
-
-    async function downloadAll() {
-        // En un editor web real unir toma tiempo, aquí descargaremos los clips o el bloque
-        // Para facilidad del usuario, uniremos los blobs en uno solo
-        const finalBlob = new Blob(segments, { type: 'video/webm' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(finalBlob);
-        a.download = "VIDEO_EDITADO_CAPACITIUMX.webm";
-        a.click();
-    }
-
-    // Arrastre de cámara
+    // Lógica de arrastre de cámara
     canvas.onmousedown = (e) => {
         const r = canvas.getBoundingClientRect();
         const x = (e.clientX - r.left) * (canvas.width / r.width);
