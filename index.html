@@ -2,216 +2,186 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CAPACITIUMX - STUDIO DIRECTOR ÉLITE</title>
+    <title>CAPACITIUMX V329 - MOTOR ESTADIO</title>
     <style>
         :root { --neon: #00ff00; --dark: #050505; --red: #ff3333; }
         body { background: var(--dark); color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
+        /* HEADER */
         header { background: #111; padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
         .logo { color: var(--neon); font-weight: bold; letter-spacing: 2px; }
 
         .main-engine { display: flex; flex: 1; overflow: hidden; }
         
-        /* Panel Izquierdo */
-        .sidebar { width: 300px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .btn-side { background: var(--neon); color: black; padding: 10px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; }
-        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .thumb-card { background: #1a1a1a; border: 1px solid #333; padding: 5px; cursor: pointer; position: relative; }
-        .thumb-card.active { border-color: var(--neon); }
+        /* BIBLIOTECA */
+        .sidebar { width: 280px; background: #000; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-load { background: var(--neon); color: black; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        #media-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        .thumb-nav { padding: 8px; background: #222; border: 1px solid #444; font-size: 11px; cursor: pointer; }
+        .thumb-nav.active { border-color: var(--neon); background: #111; }
 
-        /* Monitor de Producción */
+        /* MONITOR ESTADIO */
         .monitor-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
-        #canvas-render { width: 90%; max-width: 850px; aspect-ratio: 16/9; border: 1px solid #222; background: #000; cursor: move; }
+        #canvas-render { width: 95%; max-width: 900px; aspect-ratio: 16/9; border: 2px solid #222; background: #000; cursor: move; }
         
-        /* Consola de Director (Flotante) */
-        .director-controls { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-        .btn-director { background: rgba(0,0,0,0.8); border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-director:hover { background: var(--neon); color: black; }
+        /* CONSOLA FLOTANTE */
+        .console { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-console { background: rgba(0,0,0,0.8); border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; cursor: pointer; font-size: 11px; font-weight: bold; border-radius: 4px; }
 
-        /* Footer de Grabación */
-        .footer-tools { height: 180px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-        .btn-action { padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; text-transform: uppercase; }
+        /* FOOTER CONTROLES */
+        .footer { height: 160px; background: #111; border-top: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        .btn-main { padding: 15px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; border: none; text-transform: uppercase; font-size: 14px; }
         .btn-rec { background: var(--red); color: white; }
-        .recording { animation: pulse 1s infinite; }
-        @keyframes pulse { 50% { opacity: 0.5; } }
-        
-        /* Flechas de Navegación Diapositivas */
-        .nav-diapo { display: flex; gap: 40px; margin-top: 10px; }
-        .arrow { font-size: 30px; color: var(--neon); cursor: pointer; user-select: none; }
+        .btn-dl { background: var(--neon); color: black; }
+        .recording { animation: blink 1s infinite; box-shadow: 0 0 20px var(--red); }
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">CAPACITIUMX DIRECTOR STUDIO</div>
+    <div class="logo">CAPACITIUMX STUDIO V329</div>
     <div style="display:flex; gap:10px;">
-        <button class="btn-side" style="background:#2563eb; color:white;" onclick="assignText()">📝 ASIGNAR TEXTO</button>
-        <button class="btn-side" style="background:#400; color:white;" onclick="location.reload()">🗑️ RESET</button>
+        <button class="btn-console" style="background:#2563eb; color:white;" onclick="addText()">📝 ASIGNAR TEXTO A FOTO</button>
+        <button class="btn-console" style="background:#444;" onclick="location.reload()">🗑️ RESET</button>
     </div>
 </header>
 
 <div class="main-engine">
     <aside class="sidebar">
-        <div class="btn-side" onclick="document.getElementById('file-in').click()">📥 CARGAR RECURSOS</div>
-        <input type="file" id="file-in" multiple accept="image/*,video/*" style="display:none;" onchange="handleFiles(event)">
+        <div class="btn-load" onclick="document.getElementById('file-in').click()">📥 SUBIR FOTOS/VIDEOS</div>
+        <input type="file" id="file-in" multiple accept="image/*,video/*" style="display:none;" onchange="loadFiles(event)">
         <div id="media-list"></div>
     </aside>
 
     <main class="monitor-area">
-        <div class="director-controls">
-            <button class="btn-director" onclick="toggleCamMode()">👤 MODO: CAM GRANDE / CHICA</button>
-            <button id="btnAuto" class="btn-director" onclick="toggleAutoAdvance()">⏯️ AUTO-AVANCE: ON</button>
-            <div style="color:yellow; font-size:10px; text-align:center;">CTRL + FLECHAS PARA PASAR</div>
+        <div class="console">
+            <button class="btn-console" onclick="camMode = (camMode === 'mini' ? 'full' : 'mini')">👤 CAM: GRANDE / CHICA</button>
+            <button id="btnAuto" class="btn-console" onclick="autoAdvance = !autoAdvance">⏯️ AUTO-AVANCE: ON</button>
         </div>
-
         <canvas id="canvas-render" width="1280" height="720"></canvas>
-        
-        <div class="nav-diapo">
-            <span class="arrow" onclick="prevMedia()">◀</span>
-            <div id="status-info" style="color:#888; font-size:12px; padding-top:10px;">FOTO 0 / 0</div>
-            <span class="arrow" onclick="nextMedia()">▶</span>
-        </div>
+        <div style="margin-top:10px; color:#555; font-size:12px;">PASA FOTOS CON LAS FLECHAS DEL TECLADO</div>
     </main>
 </div>
 
-<div class="footer-tools">
-    <div style="display: flex; gap: 20px; align-items: center;">
-        <button id="recBtn" class="btn-action btn-rec" onclick="toggleRecording()">🎙️ EMPEZAR GRABACIÓN</button>
-        <button id="dlBtn" class="btn-action" style="background:var(--neon); color:black;" onclick="downloadVideo()" disabled>📥 DESCARGAR VIDEO</button>
+<div class="footer">
+    <div style="display:flex; gap:20px;">
+        <button id="btn-rec" class="btn-main btn-rec" onclick="startCapture()">🎙️ EMPEZAR GRABACIÓN</button>
+        <button id="btn-dl" class="btn-main btn-dl" onclick="download()" disabled>📥 GUARDAR VIDEO FINAL</button>
     </div>
-    <div style="font-size:10px; color:#555;">ARRASTRA EL CUADRO DE TU CÁMARA PARA UBICARLO</div>
+    <div id="status-text" style="color:yellow; font-size:12px;">SISTEMA LISTO</div>
 </div>
 
 <video id="v-cam" autoplay playsinline style="display:none"></video>
-<video id="v-player" muted style="display:none"></video>
+<video id="v-play" muted style="display:none"></video>
 
 <script>
     const canvas = document.getElementById('canvas-render');
     const ctx = canvas.getContext('2d');
     const vCam = document.getElementById('v-cam');
-    const vPlayer = document.getElementById('v-player');
+    const vPlay = document.getElementById('v-play');
 
-    let mediaLibrary = [];
-    let currentIndex = 0;
-    let isCamOn = false;
-    let camFull = false;
-    let camX = 900, camY = 50, camW = 320, camH = 240;
+    let library = [];
+    let curIdx = 0;
+    let camMode = 'mini'; // 'mini' o 'full'
+    let camX = 920, camY = 40, camW = 320, camH = 240;
     let dragging = false;
     let autoAdvance = true;
-    let lastAdvanceTime = 0;
-    
-    let recorder, chunks = [], isRecording = false, finalBlob;
+    let lastSwitch = Date.now();
+    let recorder, chunks = [], isRec = false, finalBlob;
 
-    // 1. GESTIÓN DE ARCHIVOS
-    function handleFiles(e) {
+    // 1. CARGA DE ARCHIVOS CORREGIDA
+    function loadFiles(e) {
         Array.from(e.target.files).forEach(file => {
             const url = URL.createObjectURL(file);
-            const isVideo = file.type.includes('video');
-            const item = { type: isVideo ? 'video' : 'img', url: url, text: "", el: null };
-            if (!isVideo) { const img = new Image(); img.src = url; item.el = img; }
-            mediaLibrary.push(item);
-            refreshUI();
+            const isVid = file.type.includes('video');
+            const item = { type: isVid ? 'vid' : 'img', url: url, text: '', el: null };
+            if (!isVid) { const img = new Image(); img.src = url; item.el = img; }
+            library.push(item);
+            updateList();
         });
     }
 
-    function refreshUI() {
+    function updateList() {
         const list = document.getElementById('media-list');
         list.innerHTML = "";
-        mediaLibrary.forEach((m, i) => {
-            const div = document.createElement('div');
-            div.className = `thumb-card ${i === currentIndex ? 'active' : ''}`;
-            div.innerHTML = `<small>${i+1}</small> <span style="font-size:9px">${m.text ? '💬' : ''}</span>`;
-            div.onclick = () => { currentIndex = i; refreshUI(); };
-            list.appendChild(div);
+        library.forEach((m, i) => {
+            const d = document.createElement('div');
+            d.className = `thumb-nav ${i === curIdx ? 'active' : ''}`;
+            d.innerText = `${i+1}. ${m.type === 'vid' ? '🎥' : '🖼️'} ${m.text.substring(0,10)}...`;
+            d.onclick = () => { curIdx = i; updateList(); };
+            list.appendChild(d);
         });
-        document.getElementById('status-info').innerText = `RECURSO ${currentIndex + 1} / ${mediaLibrary.length}`;
     }
 
-    function assignText() {
-        if(!mediaLibrary[currentIndex]) return;
-        const t = prompt("Texto para esta escena:", mediaLibrary[currentIndex].text);
-        if(t !== null) { mediaLibrary[currentIndex].text = t; refreshUI(); }
+    function addText() {
+        if(!library[curIdx]) return;
+        const t = prompt("Texto para esta escena:");
+        if(t !== null) { library[curIdx].text = t; updateList(); }
     }
 
-    // 2. CONTROLES DE DIRECTOR
-    async function toggleCam() {
-        const s = await navigator.mediaDevices.getUserMedia({ video: true });
-        vCam.srcObject = s; isCamOn = true;
-    }
-    toggleCam(); // Iniciar cámara por defecto
+    // 2. CÁMARA E INTERACCIÓN
+    navigator.mediaDevices.getUserMedia({ video: true }).then(s => vCam.srcObject = s);
 
-    function toggleCamMode() { camFull = !camFull; }
-    function toggleAutoAdvance() { 
-        autoAdvance = !autoAdvance; 
-        document.getElementById('btnAuto').innerText = `⏯️ AUTO-AVANCE: ${autoAdvance ? 'ON' : 'OFF'}`;
-    }
-    function nextMedia() { if(currentIndex < mediaLibrary.length - 1) currentIndex++; refreshUI(); }
-    function prevMedia() { if(currentIndex > 0) currentIndex--; refreshUI(); }
-
-    // Teclado para pasar diapositivas
-    window.onkeydown = (e) => {
-        if(e.key === "ArrowRight") nextMedia();
-        if(e.key === "ArrowLeft") prevMedia();
-    };
-
-    // 3. ARRASTRAR CÁMARA
     canvas.onmousedown = (e) => {
         const r = canvas.getBoundingClientRect();
         const x = (e.clientX - r.left) * (canvas.width / r.width);
         const y = (e.clientY - r.top) * (canvas.height / r.height);
-        if(!camFull && x > camX && x < camX + camW && y > camY && y < camY + camH) dragging = true;
+        if(camMode === 'mini' && x > camX && x < camX + camW && y > camY && y < camY + camH) dragging = true;
     };
     window.onmousemove = (e) => {
-        if (dragging) {
+        if(dragging) {
             const r = canvas.getBoundingClientRect();
             camX = (e.clientX - r.left) * (canvas.width / r.width) - camW/2;
             camY = (e.clientY - r.top) * (canvas.height / r.height) - camH/2;
         }
     };
     window.onmouseup = () => dragging = false;
+    window.onkeydown = (e) => {
+        if(e.key === "ArrowRight" && curIdx < library.length - 1) { curIdx++; updateList(); }
+        if(e.key === "ArrowLeft" && curIdx > 0) { curIdx--; updateList(); }
+    };
 
-    // 4. MOTOR DE DIBUJO
-    function draw() {
+    // 3. MOTOR DE DIBUJO (ACTIVO SIEMPRE)
+    function render() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const now = Date.now();
-        if (isRecording && autoAdvance && now - lastAdvanceTime > 4000) {
-            nextMedia();
-            lastAdvanceTime = now;
+        if(isRec && autoAdvance && Date.now() - lastSwitch > 4000) {
+            if(curIdx < library.length - 1) { curIdx++; lastSwitch = Date.now(); updateList(); }
         }
 
-        const active = mediaLibrary[currentIndex];
-        if (active) {
-            if (active.type === 'img' && active.el) ctx.drawImage(active.el, 0, 0, canvas.width, canvas.height);
-            else if (active.type === 'video') {
-                if (vPlayer.src !== active.url) { vPlayer.src = active.url; vPlayer.play(); }
-                ctx.drawImage(vPlayer, 0, 0, canvas.width, canvas.height);
+        const m = library[curIdx];
+        if(m) {
+            if(m.type === 'img' && m.el) ctx.drawImage(m.el, 0, 0, canvas.width, canvas.height);
+            else if(m.type === 'vid') {
+                if(vPlay.src !== m.url) { vPlay.src = m.url; vPlay.play(); }
+                ctx.drawImage(vPlay, 0, 0, canvas.width, canvas.height);
             }
-            if (active.text) {
+            if(m.text) {
                 ctx.fillStyle = "yellow"; ctx.font = "bold 60px Impact"; ctx.textAlign = "center";
                 ctx.strokeStyle = "black"; ctx.lineWidth = 10;
-                ctx.strokeText(active.text.toUpperCase(), canvas.width/2, 650);
-                ctx.fillText(active.text.toUpperCase(), canvas.width/2, 650);
+                ctx.strokeText(m.text.toUpperCase(), canvas.width/2, 650);
+                ctx.fillText(m.text.toUpperCase(), canvas.width/2, 650);
             }
         }
 
-        if (isCamOn) {
-            if (camFull) {
+        if(vCam.srcObject) {
+            if(camMode === 'full') {
                 ctx.drawImage(vCam, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.strokeStyle = var(--neon); ctx.lineWidth = 5;
+                ctx.strokeStyle = "#00ff00"; ctx.lineWidth = 4;
                 ctx.strokeRect(camX, camY, camW, camH);
                 ctx.drawImage(vCam, camX, camY, camW, camH);
             }
         }
-        requestAnimationFrame(draw);
+        requestAnimationFrame(render);
     }
 
-    // 5. GRABACIÓN ÉLITE
-    async function toggleRecording() {
-        const btn = document.getElementById('recBtn');
-        if (!isRecording) {
+    // 4. GRABACIÓN
+    async function startCapture() {
+        const btn = document.getElementById('btn-rec');
+        if(!isRec) {
             const audio = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
             const stream = canvas.captureStream(30);
             const combined = new MediaStream([...stream.getVideoTracks(), ...audio.getAudioTracks()]);
@@ -220,23 +190,24 @@
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 finalBlob = new Blob(chunks, { type: 'video/webm' });
-                document.getElementById('dlBtn').disabled = false;
+                document.getElementById('btn-dl').disabled = false;
+                document.getElementById('status-text').innerText = "VIDEO LISTO PARA GUARDAR";
             };
-            lastAdvanceTime = Date.now();
-            recorder.start(); isRecording = true;
-            btn.innerText = "⏹ DETENER PRODUCCIÓN"; btn.classList.add('recording');
+            lastSwitch = Date.now();
+            recorder.start(); isRec = true;
+            btn.innerText = "⏹ DETENER Y PROCESAR"; btn.classList.add('recording');
         } else {
-            recorder.stop(); isRecording = false;
+            recorder.stop(); isRec = false;
             btn.innerText = "🎙️ EMPEZAR GRABACIÓN"; btn.classList.remove('recording');
         }
     }
 
-    function downloadVideo() {
+    function download() {
         const a = document.createElement('a'); a.href = URL.createObjectURL(finalBlob);
-        a.download = `CAPACITIUMX_DIR_${Date.now()}.webm`; a.click();
+        a.download = `CAPACITIUMX_STADIUM_${Date.now()}.webm`; a.click();
     }
 
-    draw();
+    render();
 </script>
 </body>
 </html>
